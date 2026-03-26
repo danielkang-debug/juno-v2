@@ -5,6 +5,7 @@
 import { state, saveDriverMode } from './state.js';
 import { api } from './api.js';
 import { router } from './router.js';
+import './ui.js'; // Initialize shared UI utilities
 import { authView } from './views/auth.js';
 import { todayView } from './views/today.js';
 import { driverView } from './views/driver.js';

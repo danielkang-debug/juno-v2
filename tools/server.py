@@ -307,6 +307,43 @@ def optimize_route():
     return jsonify(result)
 
 
+@app.route("/api/routes/recalculate", methods=["POST"])
+def recalculate_route():
+    data = request.get_json() or {}
+    date_str = data.get("date")
+    ordered_ids = data.get("ordered_appointment_ids")
+    if not date_str or not ordered_ids:
+        return jsonify({"error": "date and ordered_appointment_ids are required"}), 400
+
+    user_id = session['user_id']
+
+    user = db.get_user_by_id(user_id)
+    start_location = None
+    if user and user.get("home_lat") is not None:
+        start_location = {
+            "lat": user["home_lat"],
+            "lon": user["home_lon"],
+            "address": user.get("home_address", ""),
+        }
+
+    departure_time = data.get("departure_time", "08:00")
+    buffer_minutes = int(user.get("buffer_minutes", 15)) if user else 15
+
+    appointments = db.list_appointments_by_date(user_id, date_str)
+    result = route_module.recalculate_route(
+        appointments,
+        ordered_ids,
+        start_location=start_location,
+        departure_time=departure_time,
+        buffer_minutes=buffer_minutes,
+    )
+
+    new_ordered_ids = [a["id"] for a in result["ordered_appointments"]]
+    db.save_route(user_id, date_str, new_ordered_ids, result["total_travel_minutes"])
+
+    return jsonify(result)
+
+
 @app.route("/api/routes/<date_str>", methods=["GET"])
 def get_route(date_str):
     user_id = session['user_id']

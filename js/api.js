@@ -61,6 +61,7 @@ export const api = {
 
     // Routes
     optimizeRoute: (data) => request('/api/routes/optimize', { method: 'POST', body: data }),
+    recalculateRoute: (data) => request('/api/routes/recalculate', { method: 'POST', body: data }),
     getRoute: (date) => request(`/api/routes/${date}`),
 
     // Geocoding

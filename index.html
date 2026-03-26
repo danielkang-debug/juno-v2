@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juno</title>
 
     <!-- Tailwind CSS (CDN Play) -->
@@ -86,6 +86,22 @@
         }
         @keyframes toast-in { from { opacity: 0; transform: translateX(-50%) translateY(20px); } }
         @keyframes toast-out { to { opacity: 0; transform: translateX(-50%) translateY(20px); } }
+
+        /* Desktop: bottom sheets become centered modals */
+        @media (min-width: 768px) {
+            .bottom-sheet {
+                bottom: auto; top: 50%; left: 50%; right: auto;
+                transform: translate(-50%, -50%) scale(0.95);
+                opacity: 0;
+                max-width: 480px; width: 100%;
+                border-radius: 16px; max-height: 80vh;
+            }
+            .bottom-sheet.open {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            .drag-handle { display: none; }
+        }
     </style>
 </head>
 <body class="bg-stone-50 text-stone-900 font-sans antialiased">
@@ -111,7 +127,7 @@
 
         <!-- Top bar -->
         <header id="app-header" class="sticky top-0 bg-white border-b border-stone-200 z-30 hidden">
-            <div class="flex items-center h-14 px-4 max-w-lg mx-auto">
+            <div class="flex items-center h-14 px-4 max-w-lg md:max-w-2xl mx-auto">
                 <button id="menu-btn" onclick="window.openNav()" class="p-2 -ml-2 rounded-lg hover:bg-stone-100">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
@@ -124,7 +140,7 @@
         </header>
 
         <!-- Main content -->
-        <main id="main-content" class="max-w-lg mx-auto px-4 pb-8">
+        <main id="main-content" class="max-w-lg md:max-w-2xl mx-auto px-4 pb-8">
         </main>
     </div>
 

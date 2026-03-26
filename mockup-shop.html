@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Juno — Shop (Mockup)</title>
+    <link rel="icon" href="icon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['DM Sans', 'sans-serif'] }
+                }
+            }
+        };
+    </script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { font-family: 'DM Sans', sans-serif; }
+        .screen { display: none; }
+        .screen.active { display: flex; flex-direction: column; }
+        .fade-in { animation: fadeIn 0.2s ease-in; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-shadow { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .bottom-bar { box-shadow: 0 -1px 3px rgba(0,0,0,0.05); }
+        .product-img {
+            background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e3 100%);
+        }
+        .badge-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-900 min-h-screen flex justify-center">
+    <div class="w-full max-w-md min-h-screen flex flex-col relative bg-white border-x border-stone-200">
+
+        <!-- ============================================ -->
+        <!-- SCREEN 1: Shop Home                          -->
+        <!-- ============================================ -->
+        <div id="screen-home" class="screen active min-h-screen fade-in">
+            <!-- Header -->
+            <div class="sticky top-0 bg-white border-b border-stone-200 px-4 py-3 flex items-center justify-between z-10">
+                <div class="flex items-center gap-2">
+                    <img src="icon.png" alt="Juno" class="w-7 h-7 rounded-lg">
+                    <span class="font-semibold text-lg">Juno Shop</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button onclick="showScreen('cart')" class="p-2 rounded-lg hover:bg-stone-100 relative">
+                        <i data-lucide="shopping-bag" class="w-5 h-5 text-stone-600"></i>
+                        <span class="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-stone-900 text-white text-[10px] font-semibold rounded-full flex items-center justify-center min-w-[18px] min-h-[18px]">2</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 overflow-y-auto pb-6">
+                <!-- Search -->
+                <div class="px-4 pt-4 pb-2">
+                    <div class="h-10 bg-stone-50 border border-stone-200 rounded-lg px-3 flex items-center gap-2">
+                        <i data-lucide="search" class="w-4 h-4 text-stone-400"></i>
+                        <span class="text-sm text-stone-400">Produkte suchen...</span>
+                    </div>
+                </div>
+
+                <!-- Midwife Picks Banner -->
+                <div class="px-4 py-3">
+                    <div class="bg-stone-900 rounded-xl p-4 text-white relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-stone-800 rounded-full -translate-y-8 translate-x-8 opacity-50"></div>
+                        <div class="absolute bottom-0 right-8 w-16 h-16 bg-stone-800 rounded-full translate-y-6 opacity-30"></div>
+                        <div class="relative">
+                            <div class="flex items-center gap-1.5 mb-1">
+                                <i data-lucide="heart" class="w-4 h-4 text-stone-300"></i>
+                                <p class="text-xs text-stone-300 font-medium uppercase tracking-wider">Empfehlungen</p>
+                            </div>
+                            <p class="font-semibold text-base">Von Ihrer Hebamme<br>Anna Müller ausgewählt</p>
+                            <button onclick="showScreen('category')" class="mt-3 h-9 bg-white text-stone-900 rounded-lg px-4 text-sm font-medium hover:bg-stone-100 inline-flex items-center gap-1.5">
+                                Entdecken
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories -->
+                <div class="px-4 py-2">
+                    <p class="font-semibold mb-3">Kategorien</p>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="showScreen('category')" class="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-stone-50">
+                            <div class="w-12 h-12 rounded-xl bg-pink-50 flex items-center justify-center">
+                                <i data-lucide="baby" class="w-5 h-5 text-pink-500"></i>
+                            </div>
+                            <span class="text-[11px] text-stone-600">Babypflege</span>
+                        </button>
+                        <button onclick="showScreen('category')" class="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-stone-50">
+                            <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center">
+                                <i data-lucide="sparkles" class="w-5 h-5 text-purple-500"></i>
+                            </div>
+                            <span class="text-[11px] text-stone-600">Hautpflege</span>
+                        </button>
+                        <button onclick="showScreen('category')" class="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-stone-50">
+                            <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-5 h-5 text-green-500"></i>
+                            </div>
+                            <span class="text-[11px] text-stone-600">Ernährung</span>
+                        </button>
+                        <button onclick="showScreen('category')" class="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-stone-50">
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                                <i data-lucide="heart-pulse" class="w-5 h-5 text-blue-500"></i>
+                            </div>
+                            <span class="text-[11px] text-stone-600">Wohlbefinden</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Midwife Recommended Products -->
+                <div class="px-4 py-3">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <p class="font-semibold">Anna empfiehlt</p>
+                            <span class="bg-stone-100 text-stone-600 text-[10px] font-medium px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                                <i data-lucide="shield-check" class="w-3 h-3"></i>
+                                Geprüft
+                            </span>
+                        </div>
+                        <button onclick="showScreen('category')" class="text-sm text-stone-500 font-medium">Alle</button>
+                    </div>
+                    <!-- Horizontal Scroll -->
+                    <div class="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4" style="scrollbar-width: none;">
+                        <!-- Product 1 -->
+                        <button onclick="showScreen('detail')" class="flex-shrink-0 w-36">
+                            <div class="w-36 h-36 rounded-lg product-img flex items-center justify-center mb-2 relative">
+                                <i data-lucide="droplets" class="w-10 h-10 text-stone-300"></i>
+                                <span class="absolute top-1.5 left-1.5 bg-stone-900 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                                    <i data-lucide="heart" class="w-2.5 h-2.5"></i>
+                                    Empfohlen
+                                </span>
+                            </div>
+                            <p class="text-sm font-medium text-left truncate">Weleda Babycreme</p>
+                            <p class="text-xs text-stone-500 text-left">Wind & Wetter</p>
+                            <p class="text-sm font-semibold text-left mt-0.5">€ 8,95</p>
+                        </button>
+                        <!-- Product 2 -->
+                        <button onclick="showScreen('detail')" class="flex-shrink-0 w-36">
+                            <div class="w-36 h-36 rounded-lg product-img flex items-center justify-center mb-2 relative">
+                                <i data-lucide="flower-2" class="w-10 h-10 text-stone-300"></i>
+                                <span class="absolute top-1.5 left-1.5 bg-stone-900 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                                    <i data-lucide="heart" class="w-2.5 h-2.5"></i>
+                                    Empfohlen
+                                </span>
+                            </div>
+                            <p class="text-sm font-medium text-left truncate">Stillöl Bio</p>
+                            <p class="text-xs text-stone-500 text-left">Brust & Stillzeit</p>
+                            <p class="text-sm font-semibold text-left mt-0.5">€ 12,50</p>
+                        </button>
+                        <!-- Product 3 -->
+                        <button onclick="showScreen('detail')" class="flex-shrink-0 w-36">
+                            <div class="w-36 h-36 rounded-lg product-img flex items-center justify-center mb-2 relative">
+                                <i data-lucide="cup-soda" class="w-10 h-10 text-stone-300"></i>
+                            </div>
+                            <p class="text-sm font-medium text-left truncate">Stilltee Kräuter</p>
+                            <p class="text-xs text-stone-500 text-left">Bio-Kräutermischung</p>
+                            <p class="text-sm font-semibold text-left mt-0.5">€ 6,90</p>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Popular Products -->
+                <div class="px-4 py-3">
+                    <p class="font-semibold mb-3">Beliebte Produkte</p>
+                    <div class="space-y-2">
+                        <!-- Popular 1 -->
+                        <button onclick="showScreen('detail')" class="w-full bg-white border border-stone-200 rounded-lg p-3 flex items-center gap-3 text-left">
+                            <div class="w-16 h-16 rounded-lg product-img flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="shirt" class="w-7 h-7 text-stone-300"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-sm">Pucktuch Bio-Baumwolle</p>
+                                <p class="text-xs text-stone-500">Schlafen & Beruhigen</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <p class="text-sm font-semibold">€ 24,90</p>
+                                    <span class="flex items-center gap-0.5 text-[10px] text-amber-600">
+                                        <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+                                        4.8
+                                    </span>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-stone-300 flex-shrink-0"></i>
+                        </button>
+                        <!-- Popular 2 -->
+                        <button onclick="showScreen('detail')" class="w-full bg-white border border-stone-200 rounded-lg p-3 flex items-center gap-3 text-left">
+                            <div class="w-16 h-16 rounded-lg product-img flex items-center justify-center flex-shrink-0 relative">
+                                <i data-lucide="thermometer" class="w-7 h-7 text-stone-300"></i>
+                                <span class="absolute -top-1 -left-1 bg-stone-900 text-white text-[8px] font-semibold px-1 py-0.5 rounded-md">
+                                    <i data-lucide="heart" class="w-2 h-2 inline"></i>
+                                </span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-sm">Fieberthermometer Baby</p>
+                                <p class="text-xs text-stone-500">Gesundheit & Sicherheit</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <p class="text-sm font-semibold">€ 19,95</p>
+                                    <span class="flex items-center gap-0.5 text-[10px] text-amber-600">
+                                        <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+                                        4.9
+                                    </span>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-stone-300 flex-shrink-0"></i>
+                        </button>
+                        <!-- Popular 3 -->
+                        <button onclick="showScreen('detail')" class="w-full bg-white border border-stone-200 rounded-lg p-3 flex items-center gap-3 text-left">
+                            <div class="w-16 h-16 rounded-lg product-img flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="pill" class="w-7 h-7 text-stone-300"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-sm">Folsäure + DHA Kapseln</p>
+                                <p class="text-xs text-stone-500">Nahrungsergänzung</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <p class="text-sm font-semibold">€ 16,90</p>
+                                    <span class="flex items-center gap-0.5 text-[10px] text-amber-600">
+                                        <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+                                        4.7
+                                    </span>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-stone-300 flex-shrink-0"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trust Banner -->
+                <div class="px-4 py-3">
+                    <div class="bg-stone-50 border border-stone-200 rounded-lg p-4">
+                        <div class="flex items-center gap-3 text-center justify-center">
+                            <div class="flex flex-col items-center gap-1">
+                                <i data-lucide="shield-check" class="w-5 h-5 text-stone-400"></i>
+                                <span class="text-[10px] text-stone-500">Hebammen-<br>geprüft</span>
+                            </div>
+                            <div class="w-px h-8 bg-stone-200"></div>
+                            <div class="flex flex-col items-center gap-1">
+                                <i data-lucide="truck" class="w-5 h-5 text-stone-400"></i>
+                                <span class="text-[10px] text-stone-500">Kostenloser<br>Versand ab 30€</span>
+                            </div>
+                            <div class="w-px h-8 bg-stone-200"></div>
+                            <div class="flex flex-col items-center gap-1">
+                                <i data-lucide="rotate-ccw" class="w-5 h-5 text-stone-400"></i>
+                                <span class="text-[10px] text-stone-500">30 Tage<br>Rückgabe</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Tab Bar -->
+            <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-stone-200 bottom-bar z-20">
+                <div class="flex items-center justify-around py-2">
+                    <button onclick="showScreen('home')" class="flex flex-col items-center gap-0.5 px-3 py-1">
+                        <i data-lucide="store" class="w-5 h-5 text-stone-900"></i>
+                        <span class="text-[10px] font-medium text-stone-900">Shop</span>
+                    </button>
+                    <button onclick="showScreen('category')" class="flex flex-col items-center gap-0.5 px-3 py-1">
+                        <i data-lucide="search" class="w-5 h-5 text-stone-400"></i>
+                        <span class="text-[10px] text-stone-400">Suchen</span>
+                    </button>
+                    <button onclick="showScreen('cart')" class="flex flex-col items-center gap-0.5 px-3 py-1 relative">
+                        <i data-lucide="shopping-bag" class="w-5 h-5 text-stone-400"></i>
+                        <span class="text-[10px] text-stone-400">Warenkorb</span>
+                        <span class="absolute -top-0.5 right-1 w-2 h-2 bg-red-500 rounded-full badge-pulse"></span>
+                    </button>
+                    <button class="flex flex-col items-center gap-0.5 px-3 py-1">
+                        <i data-lucide="user" class="w-5 h-5 text-stone-400"></i>
+                        <span class="text-[10px] text-stone-400">Profil</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SCREEN 2: Category / Product List            -->
+        <!-- ============================================ -->
+        <div id="screen-category" class="screen min-h-screen fade-in">
+            <!-- Header -->
+            <div class="sticky top-0 bg-white border-b border-stone-200 px-4 py-3 flex items-center gap-3 z-10">
+                <button onclick="showScreen('home')" class="p-1 rounded-lg hover:bg-stone-100">
+                    <i data-lucide="arrow-left" class="w-5 h-5 text-stone-600"></i>
+                </button>
+                <h1 class="font-semibold">Babypflege</h1>
+                <div class="flex-1"></div>
+                <button class="p-2 rounded-lg hover:bg-stone-100">
+                    <i data-lucide="sliders-horizontal" class="w-5 h-5 text-stone-600"></i>
+                </button>
+            </div>
+
+            <!-- Filter Chips -->
+            <div class="px-4 pt-3 pb-1 flex gap-2 overflow-x-auto" style="scrollbar-width: none;">
+                <button class="flex-shrink-0 h-8 bg-stone-900 text-white rounded-full px-3 text-xs font-medium">Alle</button>
+                <button class="flex-shrink-0 h-8 border border-stone-200 rounded-full px-3 text-xs font-medium hover:bg-stone-50 flex items-center gap-1">
+                    <i data-lucide="heart" class="w-3 h-3"></i>
+                    Von Anna empfohlen
+                </button>
+                <button class="flex-shrink-0 h-8 border border-stone-200 rounded-full px-3 text-xs font-medium hover:bg-stone-50">Bestseller</button>
+                <button class="flex-shrink-0 h-8 border border-stone-200 rounded-full px-3 text-xs font-medium hover:bg-stone-50">Bio</button>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="flex-1 overflow-y-auto px-4 py-3 pb-6">
+                <p class="text-xs text-stone-400 mb-3">12 Produkte</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Product 1 -->
+                    <button onclick="showScreen('detail')" class="text-left">
+                        <div class="w-full aspect-square rounded-lg product-img flex items-center justify-center mb-2 relative">
+                            <i data-lucide="droplets" class="w-10 h-10 text-stone-300"></i>
+                            <span class="absolute top-1.5 left-1.5 bg-stone-900 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                                <i data-lucide="heart" class="w-2.5 h-2.5"></i>
+                                Empfohlen
+                            </span>
+                        </div>
+                        <p class="text-sm font-medium truncate">Weleda Babycreme</p>
+                        <p class="text-xs text-stone-500">Wind & Wetter</p>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <p class="text-sm font-semibold">€ 8,95</p>
+                            <span class="flex items-center gap-0.5 text-[10px] text-amber-600">
+                                <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+                                4.8
+                            </span>
+                        </div>
+                    </button>
+                    <!-- Product 2 -->
+                    <button onclick="showScreen('detail')" class="text-left">
+                        <div class="w-full aspect-square rounded-lg product-img flex items-center justify-center mb-2 relative">
+                            <i data-lucide="bath" class="w-10 h-10 text-stone-300"></i>
+                            <span class="absolute top-1.5 left-1.5 bg-stone-900 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                                <i data-lucide="heart" class="w-2.5 h-2.5"></i>
+                                Empfohlen
+                            </span>
+                        </div>
+                        <p class="text-sm font-medium truncate">Calendula Babybad</p>
+                        <p class="text-xs text-stone-500">Badezusatz</p>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <p class="text-sm font-semibold">€ 11,50</p>
+                            <span class="flex items-center gap-0.5 text-[10px] text-amber-600">
+                                <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+                                4.9
+                            </span>
+                        </div>
+                    </button>
+                    <!-- Product 3 -->
+                    <button onclick="showScreen('detail')" class="text-left">
+                        <div class="w-full aspect-square rounded-lg product-img flex items-center justify-center mb-2">
+                            <i data-lucide="wind" class="w-10 h-10 text-stone-300"></i>
+                        </div>
+                        <p class="text-sm font-medium truncate">Bäuchlein-Öl</p>
+                        <p class="text-xs text-stone-500">Massage & Koliken</p>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <p class="text-sm font-semibold">€ 9,90</p>
+                            <span class="flex items-center gap-0.5 text-[10px] text-amber-600">
+                                <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+                                4.6
+                            </span>
+                        </div>
+                    </button>
+                    <!-- Product 4 -->
+                    <button onclick="showScreen('detail')" class="text-left">
+                        <div class="w-full aspect-square rounded-lg product-img flex items-center justify-center mb-2 relative">
+                            <i data-lucide="sun" class="w-10 h-10 text-stone-300"></i>
+                        </div>
+                        <p class="text-sm font-medium truncate">Wundschutzcreme</p>
+                        <p class="text-xs text-stone-500">Windelbereich</p>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <p class="text-sm font-semibold">€ 7,50</p>
+                            <span class="flex items-center gap-0.5 text-[10px] text-amber-600">
+                                <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+                                4.7
+                            </span>
+                        </div>
+                    </button>
+                    <!-- Product 5 -->
+                    <button onclick="showScreen('detail')" class="text-left">
+                        <div class="w-full aspect-square rounded-lg product-img flex items-center justify-center mb-2 relative">
+                            <i data-lucide="spray-can" class="w-10 h-10 text-stone-300"></i>
+                            <span class="absolute top-1.5 left-1.5 bg-stone-900 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                                <i data-lucide="heart" class="w-2.5 h-2.5"></i>
+                                Empfohlen
+                            </span>
+                        </div>
+                        <p class="text-sm font-medium truncate">Pflegelotion sensitiv</p>
+                        <p class="text-xs text-stone-500">Körperpflege</p>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <p class="text-sm font-semibold">€ 10,90</p>
+                            <span class="flex items-center gap-0.5 text-[10px] text-amber-600">
+                                <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+                                4.5
+                            </span>
+                        </div>
+                    </button>
+                    <!-- Product 6 -->
+                    <button onclick="showScreen('detail')" class="text-left">
+                        <div class="w-full aspect-square rounded-lg product-img flex items-center justify-center mb-2">
+                            <i data-lucide="milk" class="w-10 h-10 text-stone-300"></i>
+                        </div>
+                        <p class="text-sm font-medium truncate">Waschlotion mild</p>
+                        <p class="text-xs text-stone-500">Haar & Körper</p>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <p class="text-sm font-semibold">€ 6,90</p>
+                            <span class="flex items-center gap-0.5 text-[10px] text-amber-600">
+                                <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+                                4.4
+                            </span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SCREEN 3: Product Detail                     -->
+        <!-- ============================================ -->
+        <div id="screen-detail" class="screen min-h-screen fade-in">
+            <!-- Header -->
+            <div class="sticky top-0 bg-white border-b border-stone-200 px-4 py-3 flex items-center justify-between z-10">
+                <button onclick="showScreen('category')" class="p-1 rounded-lg hover:bg-stone-100">
+                    <i data-lucide="arrow-left" class="w-5 h-5 text-stone-600"></i>
+                </button>
+                <div class="flex items-center gap-1">
+                    <button class="p-2 rounded-lg hover:bg-stone-100">
+                        <i data-lucide="share-2" class="w-5 h-5 text-stone-600"></i>
+                    </button>
+                    <button onclick="showScreen('cart')" class="p-2 rounded-lg hover:bg-stone-100 relative">
+                        <i data-lucide="shopping-bag" class="w-5 h-5 text-stone-600"></i>
+                        <span class="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-stone-900 text-white text-[10px] font-semibold rounded-full flex items-center justify-center min-w-[18px] min-h-[18px]">2</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto pb-28">
+                <!-- Product Image -->
+                <div class="w-full aspect-square product-img flex items-center justify-center relative">
+                    <i data-lucide="droplets" class="w-20 h-20 text-stone-300"></i>
+                    <!-- Image dots -->
+                    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                        <span class="w-1.5 h-1.5 bg-stone-900 rounded-full"></span>
+                        <span class="w-1.5 h-1.5 bg-stone-300 rounded-full"></span>
+                        <span class="w-1.5 h-1.5 bg-stone-300 rounded-full"></span>
+                    </div>
+                </div>
+
+                <!-- Product Info -->
+                <div class="px-4 py-4">
+                    <!-- Midwife Badge -->
+                    <div class="inline-flex items-center gap-1.5 bg-stone-900 text-white text-xs font-medium px-2.5 py-1 rounded-full mb-3">
+                        <i data-lucide="heart" class="w-3 h-3"></i>
+                        Von Anna Müller empfohlen
+                    </div>
+
+                    <h1 class="text-xl font-semibold">Weleda Babycreme</h1>
+                    <p class="text-sm text-stone-500 mt-0.5">Wind & Wetter Schutzcreme, 50 ml</p>
+
+                    <!-- Rating -->
+                    <div class="flex items-center gap-2 mt-2">
+                        <div class="flex items-center gap-0.5">
+                            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+                            <i data-lucide="star" class="w-4 h-4 text-amber-400"></i>
+                        </div>
+                        <span class="text-sm text-stone-500">4.8 (127 Bewertungen)</span>
+                    </div>
+
+                    <!-- Price -->
+                    <p class="text-2xl font-semibold mt-3">€ 8,95</p>
+                    <p class="text-xs text-stone-400">inkl. MwSt., zzgl. Versand</p>
+
+                    <hr class="my-4 border-stone-200">
+
+                    <!-- Midwife Note -->
+                    <div class="bg-stone-50 border border-stone-200 rounded-lg p-3">
+                        <div class="flex items-start gap-2.5">
+                            <div class="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i data-lucide="user" class="w-4 h-4 text-stone-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-stone-400 uppercase tracking-wide">Anna Müller sagt:</p>
+                                <p class="text-sm text-stone-700 mt-1">"Diese Creme benutze ich seit Jahren bei all meinen Familien. Besonders im Winter schützt sie die empfindliche Babyhaut zuverlässig. Ich empfehle sie immer als Erstausstattung."</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 border-stone-200">
+
+                    <!-- Description -->
+                    <h2 class="font-semibold text-sm mb-2">Beschreibung</h2>
+                    <p class="text-sm text-stone-600 leading-relaxed">Reichhaltige Schutzcreme für das Babygesicht bei Wind, Kälte und rauer Witterung. Mit Bio-Calendula, Bienenwachs und Wollwachs. Zertifizierte Naturkosmetik — frei von synthetischen Duft-, Farb- und Konservierungsstoffen.</p>
+
+                    <!-- Features -->
+                    <div class="mt-4 space-y-2">
+                        <div class="flex items-center gap-2 text-sm">
+                            <i data-lucide="check" class="w-4 h-4 text-green-600 flex-shrink-0"></i>
+                            <span class="text-stone-600">100% zertifizierte Naturkosmetik</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i data-lucide="check" class="w-4 h-4 text-green-600 flex-shrink-0"></i>
+                            <span class="text-stone-600">Dermatologisch getestet</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i data-lucide="check" class="w-4 h-4 text-green-600 flex-shrink-0"></i>
+                            <span class="text-stone-600">Ohne Mikroplastik & Mineralöl</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i data-lucide="check" class="w-4 h-4 text-green-600 flex-shrink-0"></i>
+                            <span class="text-stone-600">Für Neugeborene geeignet</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add to Cart -->
+            <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-stone-200 px-4 py-3 z-20">
+                <div class="flex items-center gap-3">
+                    <!-- Quantity -->
+                    <div class="flex items-center border border-stone-200 rounded-lg h-11">
+                        <button class="w-10 h-full flex items-center justify-center hover:bg-stone-50 rounded-l-lg">
+                            <i data-lucide="minus" class="w-4 h-4 text-stone-400"></i>
+                        </button>
+                        <span class="w-8 text-center text-sm font-medium">1</span>
+                        <button class="w-10 h-full flex items-center justify-center hover:bg-stone-50 rounded-r-lg">
+                            <i data-lucide="plus" class="w-4 h-4 text-stone-600"></i>
+                        </button>
+                    </div>
+                    <!-- Button -->
+                    <button onclick="addedToCart()" id="add-to-cart-btn" class="flex-1 h-11 bg-stone-900 text-white rounded-lg font-medium text-sm hover:bg-stone-800 active:bg-stone-950 flex items-center justify-center gap-2">
+                        <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                        In den Warenkorb
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SCREEN 4: Cart                               -->
+        <!-- ============================================ -->
+        <div id="screen-cart" class="screen min-h-screen fade-in">
+            <!-- Header -->
+            <div class="sticky top-0 bg-white border-b border-stone-200 px-4 py-3 flex items-center gap-3 z-10">
+                <button onclick="showScreen('home')" class="p-1 rounded-lg hover:bg-stone-100">
+                    <i data-lucide="arrow-left" class="w-5 h-5 text-stone-600"></i>
+                </button>
+                <h1 class="font-semibold">Warenkorb</h1>
+                <span class="text-sm text-stone-400">(2 Artikel)</span>
+            </div>
+
+            <div class="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-52">
+                <!-- Cart Item 1 -->
+                <div class="bg-white border border-stone-200 rounded-lg p-3 flex gap-3">
+                    <div class="w-20 h-20 rounded-lg product-img flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="droplets" class="w-8 h-8 text-stone-300"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="font-medium text-sm">Weleda Babycreme</p>
+                                <p class="text-xs text-stone-500">Wind & Wetter, 50 ml</p>
+                            </div>
+                            <button class="p-1 hover:bg-stone-100 rounded">
+                                <i data-lucide="x" class="w-4 h-4 text-stone-300"></i>
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="flex items-center border border-stone-200 rounded-md h-7">
+                                <button class="w-7 h-full flex items-center justify-center hover:bg-stone-50">
+                                    <i data-lucide="minus" class="w-3 h-3 text-stone-400"></i>
+                                </button>
+                                <span class="w-6 text-center text-xs font-medium">1</span>
+                                <button class="w-7 h-full flex items-center justify-center hover:bg-stone-50">
+                                    <i data-lucide="plus" class="w-3 h-3 text-stone-600"></i>
+                                </button>
+                            </div>
+                            <p class="font-semibold text-sm">€ 8,95</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Item 2 -->
+                <div class="bg-white border border-stone-200 rounded-lg p-3 flex gap-3">
+                    <div class="w-20 h-20 rounded-lg product-img flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="flower-2" class="w-8 h-8 text-stone-300"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="font-medium text-sm">Stillöl Bio</p>
+                                <p class="text-xs text-stone-500">Brust & Stillzeit, 100 ml</p>
+                            </div>
+                            <button class="p-1 hover:bg-stone-100 rounded">
+                                <i data-lucide="x" class="w-4 h-4 text-stone-300"></i>
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="flex items-center border border-stone-200 rounded-md h-7">
+                                <button class="w-7 h-full flex items-center justify-center hover:bg-stone-50">
+                                    <i data-lucide="minus" class="w-3 h-3 text-stone-400"></i>
+                                </button>
+                                <span class="w-6 text-center text-xs font-medium">1</span>
+                                <button class="w-7 h-full flex items-center justify-center hover:bg-stone-50">
+                                    <i data-lucide="plus" class="w-3 h-3 text-stone-600"></i>
+                                </button>
+                            </div>
+                            <p class="font-semibold text-sm">€ 12,50</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Midwife Support Notice -->
+                <div class="bg-stone-50 border border-stone-200 rounded-lg p-3 flex gap-2.5">
+                    <i data-lucide="heart" class="w-4 h-4 text-stone-400 flex-shrink-0 mt-0.5"></i>
+                    <p class="text-xs text-stone-500">Mit Ihrem Einkauf unterstützen Sie Ihre Hebamme Anna Müller und helfen ihr, weiterhin die beste Betreuung zu bieten.</p>
+                </div>
+            </div>
+
+            <!-- Checkout Section -->
+            <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-stone-200 px-4 py-4 z-20">
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-stone-500">Zwischensumme</span>
+                        <span>€ 21,45</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-stone-500">Versand</span>
+                        <span class="text-green-600 font-medium">Kostenlos</span>
+                    </div>
+                    <hr class="border-stone-200">
+                    <div class="flex justify-between font-semibold">
+                        <span>Gesamt</span>
+                        <span>€ 21,45</span>
+                    </div>
+                </div>
+                <button class="w-full h-11 bg-stone-900 text-white rounded-lg font-medium text-sm hover:bg-stone-800 active:bg-stone-950 flex items-center justify-center gap-2">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                    Zur Kasse
+                </button>
+                <p class="text-[10px] text-stone-400 text-center mt-2">Sichere Zahlung mit Kreditkarte, PayPal oder Klarna</p>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- DEMO NAV                                     -->
+        <!-- ============================================ -->
+        <div id="demo-nav" class="fixed top-4 right-4 z-50">
+            <button onclick="toggleDemoMenu()" class="w-10 h-10 bg-stone-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-stone-800">
+                <i data-lucide="layers" class="w-5 h-5"></i>
+            </button>
+            <div id="demo-menu" class="hidden absolute right-0 mt-2 w-52 bg-white border border-stone-200 rounded-lg shadow-lg overflow-hidden">
+                <div class="px-3 py-2 bg-stone-50 border-b border-stone-200">
+                    <p class="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">Shop Mockup-Ansichten</p>
+                </div>
+                <button onclick="showScreen('home'); toggleDemoMenu()" class="w-full text-left px-3 py-2.5 text-sm hover:bg-stone-50 flex items-center gap-2 border-b border-stone-100">
+                    <i data-lucide="store" class="w-4 h-4 text-stone-400"></i>
+                    Shop Startseite
+                </button>
+                <button onclick="showScreen('category'); toggleDemoMenu()" class="w-full text-left px-3 py-2.5 text-sm hover:bg-stone-50 flex items-center gap-2 border-b border-stone-100">
+                    <i data-lucide="grid-3x3" class="w-4 h-4 text-stone-400"></i>
+                    Produktliste
+                </button>
+                <button onclick="showScreen('detail'); toggleDemoMenu()" class="w-full text-left px-3 py-2.5 text-sm hover:bg-stone-50 flex items-center gap-2 border-b border-stone-100">
+                    <i data-lucide="package" class="w-4 h-4 text-stone-400"></i>
+                    Produktdetail
+                </button>
+                <button onclick="showScreen('cart'); toggleDemoMenu()" class="w-full text-left px-3 py-2.5 text-sm hover:bg-stone-50 flex items-center gap-2">
+                    <i data-lucide="shopping-bag" class="w-4 h-4 text-stone-400"></i>
+                    Warenkorb
+                </button>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-stone-900 text-white text-sm px-4 py-2.5 rounded-lg shadow-lg hidden z-50 slide-up flex items-center gap-2">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Zum Warenkorb hinzugefügt!</span>
+        </div>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function showScreen(name) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const screen = document.getElementById('screen-' + name);
+            screen.classList.add('active');
+            screen.classList.remove('fade-in');
+            void screen.offsetWidth;
+            screen.classList.add('fade-in');
+            lucide.createIcons();
+        }
+
+        function addedToCart() {
+            const btn = document.getElementById('add-to-cart-btn');
+            btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Hinzugefügt!';
+            btn.classList.remove('bg-stone-900', 'hover:bg-stone-800');
+            btn.classList.add('bg-green-600', 'hover:bg-green-700');
+            lucide.createIcons();
+
+            // Show toast
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden');
+            setTimeout(() => { toast.classList.add('hidden'); }, 2500);
+
+            // Reset after delay
+            setTimeout(() => {
+                btn.innerHTML = '<i data-lucide="shopping-bag" class="w-4 h-4"></i> In den Warenkorb';
+                btn.classList.add('bg-stone-900', 'hover:bg-stone-800');
+                btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                lucide.createIcons();
+            }, 2000);
+        }
+
+        function toggleDemoMenu() {
+            document.getElementById('demo-menu').classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', (e) => {
+            const nav = document.getElementById('demo-nav');
+            if (!nav.contains(e.target)) {
+                document.getElementById('demo-menu').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

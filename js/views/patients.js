@@ -4,6 +4,7 @@
 
 import { api } from '../api.js';
 import { state } from '../state.js';
+import { escapeHtml, showBottomSheet, closeBottomSheet, showToast } from '../ui.js';
 
 let container = null;
 let patients = [];
@@ -27,7 +28,7 @@ async function render(el) {
                     <i data-lucide="plus" class="w-4 h-4"></i>
                 </button>
             </div>
-            <div id="patient-list">
+            <div id="patient-list" class="md:grid md:grid-cols-2 md:gap-2">
                 <div class="flex items-center justify-center py-8 text-stone-400">
                     <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
                 </div>
@@ -120,7 +121,7 @@ function showPatientForm(patient) {
     const isEdit = !!patient;
     const p = patient || {};
 
-    window.showBottomSheet(`
+    showBottomSheet(`
         <div class="px-4 pb-6">
             <h2 class="text-base font-semibold mb-4">${isEdit ? 'Edit Mother' : 'Add Mother'}</h2>
             <form id="patient-form" class="space-y-3">
@@ -203,21 +204,15 @@ function showPatientForm(patient) {
             } else {
                 await api.createPatient(data);
             }
-            window.closeBottomSheet();
+            closeBottomSheet();
             await loadPatients();
-            window.showToast(isEdit ? 'Mother updated' : 'Mother added');
+            showToast(isEdit ? 'Mother updated' : 'Mother added');
         } catch (err) {
-            window.showToast(err.message);
+            showToast(err.message);
             btn.disabled = false;
             btn.textContent = isEdit ? 'Save Changes' : 'Add Mother';
         }
     });
-}
-
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
 }
 
 export const patientsView = { render };

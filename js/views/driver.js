@@ -6,6 +6,7 @@ import { api } from '../api.js';
 import { state, saveDriverMode } from '../state.js';
 import { router } from '../router.js';
 import { mapManager } from '../map.js';
+import { escapeHtml } from '../ui.js';
 
 let container = null;
 
@@ -41,7 +42,7 @@ function render(el) {
     const nextLeg = nextApt ? legs.find(l => l.to_id === nextApt.id) : null;
 
     container.innerHTML = `
-        <div class="min-h-screen flex flex-col">
+        <div class="min-h-screen flex flex-col max-w-2xl mx-auto">
             <!-- Top bar -->
             <div class="flex items-center justify-between px-4 py-3">
                 <button id="driver-exit" class="flex items-center gap-1 text-sm text-stone-500 hover:text-stone-700">
@@ -77,7 +78,7 @@ function render(el) {
                 </div>
 
                 <!-- Map -->
-                <div id="driver-map" class="h-40 rounded-lg overflow-hidden border border-stone-200 mb-4"></div>
+                <div id="driver-map" class="h-40 md:h-64 rounded-lg overflow-hidden border border-stone-200 mb-4"></div>
 
                 <!-- Next stop preview -->
                 ${nextApt ? `
@@ -273,12 +274,6 @@ function exitDriverMode() {
     if (confirm('Exit driver mode? Your progress is saved.')) {
         router.navigateTo('today');
     }
-}
-
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
 }
 
 export const driverView = { render };

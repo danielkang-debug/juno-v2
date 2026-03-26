@@ -390,44 +390,112 @@ def optimize_route(appointments, start_location=None, start_time=None, buffer_mi
                 current_time = fixed_time + int(fixed_after.get("duration_minutes", 60)) + buffer_minutes
                 current_loc_idx = apt_idx
 
+    return compute_route_details(
+        ordered_geocoded, skipped, etas,
+        start_location, departure_time, buffer_minutes,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Route Details (shared by optimize + recalculate)
+# ---------------------------------------------------------------------------
+
+def compute_route_details(ordered_geocoded, skipped, etas,
+                          start_location=None, departure_time="08:00",
+                          buffer_minutes=15):
+    """
+    Compute legs, distances, road geometry, and ETAs for an already-ordered
+    list of appointments. Used by both optimize_route() and recalculate_route().
+
+    Args:
+        ordered_geocoded: list of geocoded appointment dicts, in visit order
+        skipped: list of appointment dicts that could not be geocoded
+        etas: dict mapping appointment_id -> "HH:MM" (pre-computed by optimizer,
+              or empty dict if recalculating from scratch)
+        start_location: optional {lat, lon, address}
+        departure_time: "HH:MM" string
+        buffer_minutes: int
+
+    Returns:
+        Full route result dict (same shape as optimize_route output).
+    """
+    has_home = start_location and start_location.get("lat") is not None
+
+    # Build location list and index map
+    locations = []
+    loc_indices = {}
+
+    if has_home:
+        locations.append((start_location["lat"], start_location["lon"]))
+        loc_indices["home"] = 0
+
+    for a in ordered_geocoded:
+        loc_indices[a["id"]] = len(locations)
+        locations.append((a["lat"], a["lon"]))
+
+    # Get distance matrix
+    matrix = get_distance_matrix(locations) if len(locations) >= 2 else None
+    if matrix is None and len(locations) >= 2:
+        matrix = build_haversine_matrix(locations)
+
+    # If no pre-computed ETAs, compute them by walking the ordered list
+    if not etas and matrix:
+        current_time = time_to_minutes(departure_time)
+        current_loc = loc_indices.get("home", loc_indices.get(ordered_geocoded[0]["id"], 0)) if ordered_geocoded else 0
+
+        for apt in ordered_geocoded:
+            apt_idx = loc_indices.get(apt["id"])
+            if apt_idx is None:
+                continue
+            travel = matrix[current_loc][apt_idx]
+            eta = current_time + travel
+            window_start = time_to_minutes(apt.get("window_start", apt.get("time", "")))
+            if eta < window_start:
+                eta = window_start
+            etas[apt["id"]] = minutes_to_time(eta)
+            current_time = eta + int(apt.get("duration_minutes", 60)) + buffer_minutes
+            current_loc = apt_idx
+
     # Build legs
     legs = []
     total_minutes = 0
-    prev_loc = loc_indices.get("home") if has_home else None
 
-    for apt in ordered_geocoded:
-        apt_idx = loc_indices.get(apt["id"])
-        if apt_idx is None:
-            continue
-        if prev_loc is not None:
-            mins = matrix[prev_loc][apt_idx]
-            dist = haversine(locations[prev_loc][0], locations[prev_loc][1],
-                             locations[apt_idx][0], locations[apt_idx][1])
-            from_id = "home" if prev_loc == loc_indices.get("home") else \
-                [k for k, v in loc_indices.items() if v == prev_loc and k != "home"][0] if prev_loc != loc_indices.get("home") else "home"
+    if matrix:
+        prev_loc = loc_indices.get("home") if has_home else None
+
+        for apt in ordered_geocoded:
+            apt_idx = loc_indices.get(apt["id"])
+            if apt_idx is None:
+                continue
+            if prev_loc is not None:
+                mins = matrix[prev_loc][apt_idx]
+                dist = haversine(locations[prev_loc][0], locations[prev_loc][1],
+                                 locations[apt_idx][0], locations[apt_idx][1])
+                from_id = "home" if prev_loc == loc_indices.get("home") else \
+                    [k for k, v in loc_indices.items() if v == prev_loc and k != "home"][0] if prev_loc != loc_indices.get("home") else "home"
+                legs.append({
+                    "from_id": from_id,
+                    "to_id": apt["id"],
+                    "distance_km": round(dist, 2),
+                    "minutes": mins,
+                })
+                total_minutes += mins
+            prev_loc = apt_idx
+
+        # Return-home leg
+        if has_home and ordered_geocoded:
+            last_idx = loc_indices[ordered_geocoded[-1]["id"]]
+            home_idx = loc_indices["home"]
+            mins = matrix[last_idx][home_idx]
+            dist = haversine(locations[last_idx][0], locations[last_idx][1],
+                             locations[home_idx][0], locations[home_idx][1])
             legs.append({
-                "from_id": from_id,
-                "to_id": apt["id"],
+                "from_id": ordered_geocoded[-1]["id"],
+                "to_id": "home",
                 "distance_km": round(dist, 2),
                 "minutes": mins,
             })
             total_minutes += mins
-        prev_loc = apt_idx
-
-    # Return-home leg
-    if has_home and ordered_geocoded:
-        last_idx = loc_indices[ordered_geocoded[-1]["id"]]
-        home_idx = loc_indices["home"]
-        mins = matrix[last_idx][home_idx]
-        dist = haversine(locations[last_idx][0], locations[last_idx][1],
-                         locations[home_idx][0], locations[home_idx][1])
-        legs.append({
-            "from_id": ordered_geocoded[-1]["id"],
-            "to_id": "home",
-            "distance_km": round(dist, 2),
-            "minutes": mins,
-        })
-        total_minutes += mins
 
     # Get road geometry for map display
     osrm_waypoints = []
@@ -462,13 +530,49 @@ def optimize_route(appointments, start_location=None, start_time=None, buffer_mi
         "total_travel_minutes": total_minutes,
         "total_distance_km": total_distance_km,
         "etas": etas,
-        "geocoded_count": len(geocoded),
+        "geocoded_count": len(ordered_geocoded),
         "skipped_count": len(skipped),
         "start_location": start_location,
         "road_geometry": road_geometry,
         "buffer_minutes": buffer_minutes,
         "departure_time": departure_time,
     }
+
+
+def recalculate_route(appointments, ordered_ids, start_location=None,
+                      departure_time="08:00", buffer_minutes=15):
+    """
+    Recalculate ETAs, legs, and geometry for a manually reordered appointment list.
+
+    Args:
+        appointments: all appointment dicts for the day
+        ordered_ids: list of appointment IDs in the desired visit order
+        start_location: optional {lat, lon, address}
+        departure_time: "HH:MM"
+        buffer_minutes: int
+
+    Returns:
+        Same shape as optimize_route() output.
+    """
+    apt_map = {a["id"]: a for a in appointments}
+    geocoded = []
+    for aid in ordered_ids:
+        apt = apt_map.pop(aid, None)
+        if apt and apt.get("lat") is not None and apt.get("lon") is not None:
+            geocoded.append(apt)
+
+    # Any remaining appointments not in ordered_ids (shouldn't happen, but safe)
+    for apt in apt_map.values():
+        if apt.get("lat") is not None and apt.get("lon") is not None:
+            geocoded.append(apt)
+
+    skipped = [a for a in appointments if a.get("lat") is None or a.get("lon") is None]
+
+    # ETAs will be computed fresh by compute_route_details
+    return compute_route_details(
+        geocoded, skipped, {},
+        start_location, departure_time, buffer_minutes,
+    )
 
 
 # ---------------------------------------------------------------------------

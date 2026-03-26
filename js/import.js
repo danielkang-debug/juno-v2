@@ -3,6 +3,7 @@
  */
 
 import { api } from './api.js';
+import { escapeHtml, showBottomSheet, closeBottomSheet, showToast } from './ui.js';
 
 // ---------------------------------------------------------------------------
 // CSV Parser
@@ -126,7 +127,7 @@ function autoMapColumns(headers) {
 // ---------------------------------------------------------------------------
 
 export function showImportSheet(onComplete) {
-    window.showBottomSheet(`
+    showBottomSheet(`
         <div class="px-4 pb-6">
             <h2 class="text-base font-semibold mb-4">Import Appointments</h2>
             <p class="text-sm text-stone-500 mb-4">Upload a CSV or iCal (.ics) file with your appointments.</p>
@@ -162,7 +163,7 @@ export function showImportSheet(onComplete) {
 function handleCSVImport(text, onComplete) {
     const { headers, rows } = parseCSV(text);
     if (rows.length === 0) {
-        window.showToast('No data found in file');
+        showToast('No data found in file');
         return;
     }
 
@@ -173,7 +174,7 @@ function handleCSVImport(text, onComplete) {
 function handleICalImport(text, onComplete) {
     const events = parseICal(text);
     if (events.length === 0) {
-        window.showToast('No events found in file');
+        showToast('No events found in file');
         return;
     }
 
@@ -235,7 +236,7 @@ function showMappingUI(headers, rows, mapping, onComplete) {
         });
 
         if (!finalMapping.patient_name || !finalMapping.date || !finalMapping.time) {
-            window.showToast('Name, Date, and Time mappings are required');
+            showToast('Name, Date, and Time mappings are required');
             return;
         }
 
@@ -300,11 +301,11 @@ function showPreviewAndConfirm(items, onComplete) {
 
         try {
             const result = await api.importAppointments(items);
-            window.closeBottomSheet();
-            window.showToast(`Imported ${result.created_appointments} appointments`);
+            closeBottomSheet();
+            showToast(`Imported ${result.created_appointments} appointments`);
             if (onComplete) onComplete();
         } catch (err) {
-            window.showToast('Import failed: ' + err.message);
+            showToast('Import failed: ' + err.message);
             btn.disabled = false;
             btn.textContent = 'Confirm Import';
         }
@@ -328,8 +329,3 @@ function normalizeDate(str) {
     return str;
 }
 
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-}
