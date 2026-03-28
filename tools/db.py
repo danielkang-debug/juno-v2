@@ -251,7 +251,12 @@ def list_appointments_by_date(user_id, date_str):
 def list_appointments_by_month(user_id, month_str):
     with get_conn() as conn:
         rows = conn.execute("""
-            SELECT a.date, COUNT(*) as count
+            SELECT
+                a.date,
+                COUNT(*) as count,
+                SUM(CASE WHEN a.visit_type = 'prenatal'  THEN 1 ELSE 0 END) as prenatal,
+                SUM(CASE WHEN a.visit_type = 'postnatal' THEN 1 ELSE 0 END) as postnatal,
+                SUM(CASE WHEN a.visit_type = 'birth'     THEN 1 ELSE 0 END) as birth
             FROM appointments a
             WHERE a.date LIKE ? AND a.status != 'cancelled' AND a.user_id = ?
             GROUP BY a.date

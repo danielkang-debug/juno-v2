@@ -70,11 +70,36 @@ async function renderMonth() {
     try {
         const counts = await api.getAppointments({ month: currentMonth });
         const countMap = {};
-        counts.forEach(c => { countMap[c.date] = c.count; });
+        counts.forEach(c => { countMap[c.date] = c; });
         renderGrid(year, month, countMap);
     } catch (e) {
         renderGrid(year, month, {});
     }
+}
+
+function buildDots(entry, isToday) {
+    if (!entry || entry.count === 0) return '';
+    const typeOrder = ['prenatal', 'postnatal', 'birth'];
+    const colorMap = {
+        prenatal:  isToday ? 'bg-white/60' : 'bg-stone-400',
+        postnatal: isToday ? 'bg-white/60' : 'bg-stone-600',
+        birth:     isToday ? 'bg-white/60' : 'bg-stone-900',
+    };
+    const dots = [];
+    for (const type of typeOrder) {
+        for (let i = 0; i < (entry[type] || 0); i++) {
+            dots.push(`<span class="w-1.5 h-1.5 rounded-full ${colorMap[type]} flex-shrink-0"></span>`);
+        }
+    }
+    if (dots.length > 4) {
+        const shown = dots.slice(0, 3);
+        const overflow = dots.length - 3;
+        return `<div class="flex gap-0.5 mt-0.5 flex-wrap justify-center">
+            ${shown.join('')}
+            <span class="text-[9px] leading-none ${isToday ? 'text-white/70' : 'text-stone-400'}">+${overflow}</span>
+        </div>`;
+    }
+    return `<div class="flex gap-0.5 mt-0.5 flex-wrap justify-center">${dots.join('')}</div>`;
 }
 
 function renderGrid(year, month, countMap) {
@@ -97,16 +122,15 @@ function renderGrid(year, month, countMap) {
     // Days
     for (let d = 1; d <= lastDay.getDate(); d++) {
         const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const count = countMap[dateStr] || 0;
+        const entry = countMap[dateStr];
         const isToday = dateStr === today;
 
         html += `
             <button class="cal-day aspect-square flex flex-col items-center justify-center rounded-lg text-sm
-                ${isToday ? 'bg-stone-900 text-white' : 'hover:bg-stone-100'}
-                ${count > 0 ? 'font-medium' : 'text-stone-400'}"
+                ${isToday ? 'bg-stone-900 text-white' : 'hover:bg-stone-100'}"
                 data-date="${dateStr}">
                 ${d}
-                ${count > 0 ? `<span class="w-1.5 h-1.5 rounded-full ${isToday ? 'bg-white' : 'bg-stone-900'} mt-0.5"></span>` : ''}
+                ${buildDots(entry, isToday)}
             </button>
         `;
     }

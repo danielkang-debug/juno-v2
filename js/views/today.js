@@ -12,7 +12,6 @@ import { exportToGoogleMaps, showNotifySheet } from './notify.js';
 
 let container = null;
 let routeStartTime = '08:00'; // persists across re-renders within session
-let reorderInProgress = false;
 
 function formatDate(dateStr) {
     const d = new Date(dateStr + 'T00:00:00');
@@ -179,13 +178,158 @@ async function loadAppointments() {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Timeline helpers
+// ---------------------------------------------------------------------------
+
+const PX_PER_HOUR = 64;
+
+function minutesToPx(minutes, dayStartMinutes) {
+    return (minutes - dayStartMinutes) * PX_PER_HOUR / 60;
+}
+
+function computeDayRange(apts, etas) {
+    let earliest = 8 * 60;
+    let latest = 18 * 60;
+    for (const apt of apts) {
+        const isFlex = apt.appointment_kind !== 'fixed';
+        const assignedTime = etas[apt.id];
+        let startMin, endMin;
+        if (isFlex && !assignedTime) {
+            startMin = timeToMinutes(apt.window_start || apt.time || '08:00');
+            endMin   = timeToMinutes(apt.window_end   || apt.time || '18:00');
+        } else {
+            startMin = timeToMinutes(assignedTime || apt.time || '08:00');
+            endMin   = startMin + (apt.duration_minutes || 60);
+        }
+        earliest = Math.min(earliest, startMin - 60);
+        latest   = Math.max(latest,   endMin   + 60);
+    }
+    return {
+        earliest: Math.floor(Math.min(earliest, 8 * 60) / 60) * 60,
+        latest:   Math.ceil( Math.max(latest,  18 * 60) / 60) * 60,
+    };
+}
+
+function assignColumns(blocks) {
+    const sorted = [...blocks].sort((a, b) => a.startMin - b.startMin);
+    const colEnds = []; // endMin of last block in each column
+    for (const block of sorted) {
+        let placed = false;
+        for (let c = 0; c < colEnds.length; c++) {
+            if (colEnds[c] <= block.startMin) {
+                block.colIndex = c;
+                colEnds[c] = block.endMin;
+                placed = true;
+                break;
+            }
+        }
+        if (!placed) {
+            block.colIndex = colEnds.length;
+            colEnds.push(block.endMin);
+        }
+    }
+    const totalCols = Math.max(colEnds.length, 1);
+    blocks.forEach(b => { b.colTotal = totalCols; });
+    return blocks;
+}
+
+function renderTimeline(apts, etas) {
+    const { earliest, latest } = computeDayRange(apts, etas);
+    const totalHeight = minutesToPx(latest, earliest);
+
+    // Build block descriptors
+    const blocks = apts.map(apt => {
+        const isFlex = apt.appointment_kind !== 'fixed';
+        const assignedTime = etas[apt.id];
+        const isWindowMode = isFlex && !assignedTime;
+        const startMin = isWindowMode
+            ? timeToMinutes(apt.window_start || apt.time || '08:00')
+            : timeToMinutes(assignedTime || apt.time || '08:00');
+        const endMin = isWindowMode
+            ? timeToMinutes(apt.window_end || apt.time || '18:00')
+            : startMin + (apt.duration_minutes || 60);
+        return { ...apt, startMin, endMin, isWindowMode };
+    });
+
+    assignColumns(blocks);
+
+    // Hour labels + grid lines
+    let hoursHtml = '';
+    for (let m = earliest; m <= latest; m += 60) {
+        const h = Math.floor(m / 60);
+        const label = h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`;
+        const top = minutesToPx(m, earliest);
+        hoursHtml += `
+            <div class="absolute left-0 right-0 flex items-start pointer-events-none" style="top:${top}px;">
+                <span class="w-11 text-right pr-2 text-[10px] text-stone-400 leading-none shrink-0" style="margin-top:-6px;">${label}</span>
+                <div class="flex-1 border-t border-stone-100"></div>
+            </div>`;
+    }
+
+    // Now-line (today only)
+    let nowHtml = '';
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (state.selectedDate === todayStr) {
+        const now = new Date();
+        const nowMin = now.getHours() * 60 + now.getMinutes();
+        const nowTop = minutesToPx(nowMin, earliest);
+        if (nowTop >= 0 && nowTop <= totalHeight) {
+            nowHtml = `
+                <div class="absolute pointer-events-none z-10" style="left:44px;right:0;top:${nowTop}px;">
+                    <div class="relative" style="height:2px;background:#ef4444;">
+                        <div class="absolute rounded-full" style="width:10px;height:10px;background:#ef4444;left:-5px;top:-4px;"></div>
+                    </div>
+                </div>`;
+        }
+    }
+
+    // Appointment blocks
+    const blocksHtml = blocks.map(b => {
+        const top    = minutesToPx(b.startMin, earliest);
+        const height = Math.max(minutesToPx(b.endMin, earliest) - top, 22);
+        const colWidthPct  = 100 / b.colTotal;
+        const leftPct  = b.colIndex * colWidthPct;
+        const rightPct = (b.colTotal - b.colIndex - 1) * colWidthPct;
+
+        const timeLabel = b.isWindowMode
+            ? `${b.window_start}–${b.window_end} · ${b.visit_type} · ${b.duration_minutes || 60} min`
+            : `${etas[b.id] || b.time} · ${b.visit_type} · ${b.duration_minutes || 60} min`;
+
+        const blockStyle = b.isWindowMode
+            ? 'background:rgba(168,162,158,0.10);border:1.5px dashed #a8a29e;color:#44403c;'
+            : 'background:#1c1917;color:#fff;';
+
+        return `
+            <div class="absolute rounded-md overflow-hidden cursor-pointer"
+                 style="top:${top}px;height:${height}px;left:calc(${leftPct}% + 2px);right:calc(${rightPct}% + 2px);padding:4px 7px;box-sizing:border-box;${blockStyle}"
+                 data-apt-id="${b.id}">
+                <div style="font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;">${escapeHtml(b.patient_name)}</div>
+                ${height > 30 ? `<div style="font-size:10px;opacity:0.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(timeLabel)}</div>` : ''}
+            </div>`;
+    }).join('');
+
+    return `
+        <div class="relative mb-3" style="height:${totalHeight}px;">
+            ${hoursHtml}
+            <!-- Appointment column (starts after 44px time gutter) -->
+            <div class="absolute inset-y-0" style="left:44px;right:0;">
+                ${nowHtml}
+                ${blocksHtml}
+            </div>
+        </div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Render appointment list (timeline view)
+// ---------------------------------------------------------------------------
+
 function renderAppointmentList() {
     const content = document.getElementById('today-content');
     const apts = state.optimizedRoute
         ? state.optimizedRoute.ordered_appointments
         : state.appointments;
     const etas = state.optimizedRoute?.etas || {};
-    const legs = state.optimizedRoute?.legs || [];
     const isOptimized = !!state.optimizedRoute;
 
     let html = '';
@@ -221,104 +365,8 @@ function renderAppointmentList() {
             </button>
         `;
     } else {
-        // Starting point card
-        if (isOptimized && state.user?.home_lat != null) {
-            const firstLeg = legs[0];
-            const departureTime = state.optimizedRoute.departure_time || '';
-            html += `
-                <div class="bg-stone-50 rounded-lg border border-stone-200 p-3 mb-1 flex items-center gap-3">
-                    <i data-lucide="home" class="w-5 h-5 text-stone-400"></i>
-                    <div class="flex-1">
-                        <span class="text-sm font-medium">Start</span>
-                        ${departureTime ? `<span class="text-sm text-stone-500 ml-2">Depart ${departureTime}</span>` : ''}
-                        <div class="text-xs text-stone-400 truncate mt-0.5">${escapeHtml(state.user.home_address || '')}</div>
-                    </div>
-                </div>
-            `;
-            if (firstLeg) {
-                html += `
-                    <div class="flex items-center gap-2 py-1 pl-5">
-                        <div class="w-px h-4 bg-stone-300"></div>
-                        <span class="text-xs text-stone-400">${firstLeg.distance_km} km &middot; ${firstLeg.minutes} min</span>
-                    </div>
-                `;
-            }
-        }
-
-        // Appointment cards
-        apts.forEach((apt, i) => {
-            const isFixed = apt.appointment_kind === 'fixed';
-            const eta = etas[apt.id];
-            const num = isOptimized ? i + 1 : null;
-
-            if (isOptimized && i > 0) {
-                const legIdx = state.user?.home_lat != null ? i : i - 1;
-                const leg = legs[legIdx];
-                if (leg) {
-                    html += `
-                        <div class="flex items-center gap-2 py-1 pl-5">
-                            <div class="w-px h-4 bg-stone-300"></div>
-                            <span class="text-xs text-stone-400">${leg.distance_km} km &middot; ${leg.minutes} min</span>
-                        </div>
-                    `;
-                }
-            }
-
-            html += `
-                <div class="bg-white rounded-lg border border-stone-200 p-3 mb-1" data-apt-id="${apt.id}">
-                    <div class="flex items-start gap-3">
-                        ${num ? `<span class="w-6 h-6 rounded-full bg-stone-900 text-white text-xs flex items-center justify-center shrink-0 mt-0.5">${num}</span>` : ''}
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 mb-0.5">
-                                <span class="text-sm font-medium">${escapeHtml(apt.patient_name)}</span>
-                                <span class="text-xs px-1.5 py-0.5 rounded ${isFixed ? 'bg-stone-100 text-stone-600' : 'bg-stone-50 text-stone-400 border border-dashed border-stone-300'}">${isFixed ? 'Fixed' : 'Flex'}</span>
-                            </div>
-                            <div class="text-sm text-stone-500">
-                                ${eta ? `ETA ${eta}` : apt.time} · ${apt.duration_minutes || 60} min · ${apt.visit_type || 'Visit'}
-                            </div>
-                            <div class="text-xs text-stone-400 truncate mt-0.5">${escapeHtml(apt.address || '')}</div>
-                            ${!apt.lat && apt.address ? '<div class="text-xs text-red-500 mt-0.5">No location found</div>' : ''}
-                        </div>
-                        ${!isOptimized ? `<span class="text-sm text-stone-400 shrink-0">${apt.time}</span>` : ''}
-                        ${isOptimized ? `
-                            <div class="flex flex-col gap-0.5 shrink-0 ml-1">
-                                <button class="reorder-btn w-7 h-7 flex items-center justify-center rounded hover:bg-stone-100 ${i === 0 ? 'invisible' : ''}" data-dir="up" data-idx="${i}">
-                                    <i data-lucide="chevron-up" class="w-4 h-4 text-stone-400"></i>
-                                </button>
-                                <button class="reorder-btn w-7 h-7 flex items-center justify-center rounded hover:bg-stone-100 ${i === apts.length - 1 ? 'invisible' : ''}" data-dir="down" data-idx="${i}">
-                                    <i data-lucide="chevron-down" class="w-4 h-4 text-stone-400"></i>
-                                </button>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        });
-
-        // Total round-trip distance
-        if (isOptimized && state.optimizedRoute.total_distance_km != null) {
-            const lastLeg = legs[legs.length - 1];
-            const returnInfo = lastLeg && lastLeg.to_id === 'home'
-                ? `${lastLeg.distance_km} km return`
-                : '';
-            if (returnInfo) {
-                html += `
-                    <div class="flex items-center gap-2 py-1 pl-5">
-                        <div class="w-px h-4 bg-stone-300"></div>
-                        <span class="text-xs text-stone-400">${returnInfo}</span>
-                    </div>
-                `;
-            }
-            html += `
-                <div class="bg-stone-50 rounded-lg border border-stone-200 p-3 mb-1 flex items-center gap-3">
-                    <i data-lucide="home" class="w-5 h-5 text-stone-400"></i>
-                    <div class="flex-1">
-                        <span class="text-sm font-medium">Total round trip</span>
-                        <span class="text-sm text-stone-500 ml-2">${state.optimizedRoute.total_distance_km} km</span>
-                    </div>
-                </div>
-            `;
-        }
+        // Timeline
+        html += renderTimeline(apts, etas);
 
         // Inline add row (only before optimization)
         if (!isOptimized) {
@@ -400,23 +448,13 @@ function renderAppointmentList() {
         }
     });
 
-    // Appointment card click → edit (ignore reorder button clicks)
-    document.querySelectorAll('[data-apt-id]').forEach(card => {
-        card.style.cursor = 'pointer';
-        card.addEventListener('click', (e) => {
-            if (e.target.closest('.reorder-btn')) return;
-            const aptId = card.dataset.aptId;
+    // Block click → edit
+    document.querySelectorAll('[data-apt-id]').forEach(block => {
+        block.addEventListener('click', () => {
+            const aptId = block.dataset.aptId;
             const apt = (state.optimizedRoute?.ordered_appointments || state.appointments)
                 .find(a => a.id === aptId);
             if (apt) showEditAppointment(apt, loadAppointments);
-        });
-    });
-
-    // Reorder buttons
-    document.querySelectorAll('.reorder-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            handleReorder(parseInt(btn.dataset.idx), btn.dataset.dir);
         });
     });
 
@@ -429,70 +467,8 @@ function renderAppointmentList() {
 }
 
 // ---------------------------------------------------------------------------
-// Reorder
+// Time helpers
 // ---------------------------------------------------------------------------
-
-function haversineKm(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const toRad = (v) => v * Math.PI / 180;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function recomputeLocally(newOrder, route) {
-    const departureMins = timeToMinutes(route.departure_time || routeStartTime);
-    const bufferMins = route.buffer_minutes ?? 15;
-    const user = state.user;
-    const hasHome = user?.home_lat != null;
-
-    // Compute ETAs and legs by walking the ordered list
-    const etas = {};
-    const legs = [];
-    let currentTime = departureMins;
-    let prevLat = hasHome ? user.home_lat : null;
-    let prevLon = hasHome ? user.home_lon : null;
-    let prevId = hasHome ? 'home' : null;
-
-    for (const apt of newOrder) {
-        if (apt.lat == null) continue;
-        if (prevLat != null) {
-            const dist = haversineKm(prevLat, prevLon, apt.lat, apt.lon);
-            const mins = Math.max(1, Math.round((dist / 30) * 60)); // ~30 km/h avg
-            legs.push({ from_id: prevId, to_id: apt.id, distance_km: Math.round(dist * 100) / 100, minutes: mins });
-            currentTime += mins;
-        }
-        const windowStart = timeToMinutes(apt.window_start || apt.time || '');
-        if (currentTime < windowStart) currentTime = windowStart;
-        etas[apt.id] = minutesToTime(currentTime);
-        currentTime += (apt.duration_minutes || 60) + bufferMins;
-        prevLat = apt.lat;
-        prevLon = apt.lon;
-        prevId = apt.id;
-    }
-
-    // Return-home leg
-    if (hasHome && newOrder.length > 0) {
-        const last = newOrder[newOrder.length - 1];
-        if (last.lat != null) {
-            const dist = haversineKm(last.lat, last.lon, user.home_lat, user.home_lon);
-            const mins = Math.max(1, Math.round((dist / 30) * 60));
-            legs.push({ from_id: last.id, to_id: 'home', distance_km: Math.round(dist * 100) / 100, minutes: mins });
-        }
-    }
-
-    const totalKm = Math.round(legs.reduce((s, l) => s + l.distance_km, 0) * 10) / 10;
-
-    return {
-        ...route,
-        ordered_appointments: newOrder,
-        etas,
-        legs,
-        total_distance_km: totalKm,
-        road_geometry: null, // cleared until backend updates
-    };
-}
 
 function timeToMinutes(str) {
     if (!str) return 0;
@@ -500,48 +476,6 @@ function timeToMinutes(str) {
     return h * 60 + (m || 0);
 }
 
-function minutesToTime(mins) {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
-
-function handleReorder(index, direction) {
-    if (reorderInProgress) return;
-    const route = state.optimizedRoute;
-    if (!route) return;
-
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    const apts = route.ordered_appointments;
-    if (targetIndex < 0 || targetIndex >= apts.length) return;
-
-    // Swap
-    const newOrder = [...apts];
-    [newOrder[index], newOrder[targetIndex]] = [newOrder[targetIndex], newOrder[index]];
-
-    // Instant local recalculation
-    const scrollY = window.scrollY;
-    state.optimizedRoute = recomputeLocally(newOrder, route);
-    renderAppointmentList();
-    window.scrollTo(0, scrollY);
-
-    // Background: get accurate OSRM data and save to server
-    reorderInProgress = true;
-    api.recalculateRoute({
-        date: state.selectedDate,
-        ordered_appointment_ids: newOrder.map(a => a.id),
-        departure_time: route.departure_time || routeStartTime,
-    }).then(result => {
-        state.optimizedRoute = result;
-        const savedScroll = window.scrollY;
-        renderAppointmentList();
-        window.scrollTo(0, savedScroll);
-    }).catch(() => {
-        // Local data is already showing — just skip the OSRM update
-    }).finally(() => {
-        reorderInProgress = false;
-    });
-}
 
 // ---------------------------------------------------------------------------
 // Optimize
