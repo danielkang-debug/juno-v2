@@ -167,8 +167,8 @@ def create_patient(user_id, data):
         conn.execute("""
             INSERT INTO patients (id, user_id, name, address, phone,
                 gestational_age_weeks, gestational_age_days,
-                due_date, notes, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                due_date, notes, status, created_at, lat, lon)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             patient_id, user_id,
             data.get("name", ""),
@@ -180,6 +180,8 @@ def create_patient(user_id, data):
             data.get("notes", ""),
             data.get("status", "active"),
             now,
+            data.get("lat"),
+            data.get("lon"),
         ))
     return get_patient(user_id, patient_id)
 
