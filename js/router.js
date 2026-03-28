@@ -55,7 +55,7 @@ export const router = {
     },
 
     parseHash() {
-        const hash = location.hash.slice(1) || 'today';
+        const hash = location.hash.slice(1) || 'dashboard';
         const [name, queryString] = hash.split('?');
         const params = {};
         if (queryString) {

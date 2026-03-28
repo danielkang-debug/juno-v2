@@ -40,39 +40,44 @@ export async function showAddAppointment(onSaved) {
                     <input id="new-patient-phone" type="tel" placeholder="Phone (optional)"
                         class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Date</label>
-                        <input id="apt-date" type="date" value="${state.selectedDate}" required
-                            class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Time</label>
-                        <input id="apt-time" type="time" value="09:00" required
-                            class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Date</label>
+                    <input id="apt-date" type="date" value="${state.selectedDate}" required
+                        class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Type</label>
+                    <label class="block text-sm font-medium mb-1">Scheduling</label>
                     <div class="flex gap-2">
                         <label class="flex-1">
                             <input type="radio" name="apt-kind" value="fixed" checked class="hidden peer" />
-                            <div class="h-10 flex items-center justify-center rounded-lg border border-stone-200 text-sm peer-checked:bg-stone-900 peer-checked:text-white peer-checked:border-stone-900 cursor-pointer">Fixed</div>
+                            <div class="h-10 flex items-center justify-center rounded-lg border border-stone-200 text-sm peer-checked:bg-stone-900 peer-checked:text-white peer-checked:border-stone-900 cursor-pointer">Fixed time</div>
                         </label>
                         <label class="flex-1">
                             <input type="radio" name="apt-kind" value="flexible" class="hidden peer" />
-                            <div class="h-10 flex items-center justify-center rounded-lg border border-stone-200 text-sm peer-checked:bg-stone-900 peer-checked:text-white peer-checked:border-stone-900 cursor-pointer">Flex</div>
+                            <div class="h-10 flex items-center justify-center rounded-lg border border-stone-200 text-sm peer-checked:bg-stone-900 peer-checked:text-white peer-checked:border-stone-900 cursor-pointer">Time window</div>
                         </label>
                     </div>
                 </div>
-                <div id="window-end-field" class="hidden">
-                    <label class="block text-sm font-medium mb-1">Flexible until</label>
-                    <input id="apt-window-end" type="time" value="13:00"
+                <div id="apt-time-fixed">
+                    <label class="block text-sm font-medium mb-1">Time</label>
+                    <input id="apt-time" type="time" value="09:00" required
                         class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
+                </div>
+                <div id="apt-time-window" class="hidden grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Earliest</label>
+                        <input id="apt-window-start" type="time" value="09:00"
+                            class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Latest</label>
+                        <input id="apt-window-end" type="time" value="13:00"
+                            class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium mb-1">Visit type</label>
+                        <label class="block text-sm font-medium mb-1">Visit</label>
                         <select id="apt-visit-type" class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm">
                             <option value="prenatal">Prenatal</option>
                             <option value="postnatal">Postnatal</option>
@@ -91,6 +96,11 @@ export async function showAddAppointment(onSaved) {
                         </select>
                     </div>
                 </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Notes</label>
+                    <textarea id="apt-notes" rows="2" placeholder="Optional notes"
+                        class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm resize-none"></textarea>
+                </div>
                 <button type="submit" id="apt-submit"
                     class="w-full h-11 bg-stone-900 text-white rounded-lg font-medium hover:bg-stone-800 mt-2">
                     Add Appointment
@@ -104,10 +114,12 @@ export async function showAddAppointment(onSaved) {
         document.getElementById('new-patient-fields').classList.toggle('hidden', e.target.value !== '__new');
     });
 
-    // Toggle window end field
+    // Toggle fixed time vs time window fields
     document.querySelectorAll('input[name="apt-kind"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            document.getElementById('window-end-field').classList.toggle('hidden', e.target.value !== 'flexible');
+            const isWindow = e.target.value === 'flexible';
+            document.getElementById('apt-time-fixed').classList.toggle('hidden', isWindow);
+            document.getElementById('apt-time-window').classList.toggle('hidden', !isWindow);
         });
     });
 
@@ -131,7 +143,10 @@ export async function showAddAppointment(onSaved) {
             }
 
             const kind = document.querySelector('input[name="apt-kind"]:checked').value;
-            const time = document.getElementById('apt-time').value;
+            const isWindow = kind === 'flexible';
+            const time = isWindow
+                ? document.getElementById('apt-window-start').value
+                : document.getElementById('apt-time').value;
 
             await api.createAppointment({
                 patient_id: patientId,
@@ -141,7 +156,8 @@ export async function showAddAppointment(onSaved) {
                 duration_minutes: parseInt(document.getElementById('apt-duration').value),
                 appointment_kind: kind,
                 window_start: time,
-                window_end: kind === 'flexible' ? document.getElementById('apt-window-end').value : '',
+                window_end: isWindow ? document.getElementById('apt-window-end').value : '',
+                notes: document.getElementById('apt-notes').value,
             });
 
             closeBottomSheet();
@@ -178,39 +194,44 @@ export function showEditAppointment(apt, onSaved) {
                         ${escapeHtml(apt.patient_name)}
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Date</label>
-                        <input id="edit-date" type="date" value="${apt.date}" required
-                            class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Time</label>
-                        <input id="edit-time" type="time" value="${apt.time}" required
-                            class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Date</label>
+                    <input id="edit-date" type="date" value="${apt.date}" required
+                        class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Type</label>
+                    <label class="block text-sm font-medium mb-1">Scheduling</label>
                     <div class="flex gap-2">
                         <label class="flex-1">
                             <input type="radio" name="edit-kind" value="fixed" ${isFixed ? 'checked' : ''} class="hidden peer" />
-                            <div class="h-10 flex items-center justify-center rounded-lg border border-stone-200 text-sm peer-checked:bg-stone-900 peer-checked:text-white peer-checked:border-stone-900 cursor-pointer">Fixed</div>
+                            <div class="h-10 flex items-center justify-center rounded-lg border border-stone-200 text-sm peer-checked:bg-stone-900 peer-checked:text-white peer-checked:border-stone-900 cursor-pointer">Fixed time</div>
                         </label>
                         <label class="flex-1">
                             <input type="radio" name="edit-kind" value="flexible" ${isFlex ? 'checked' : ''} class="hidden peer" />
-                            <div class="h-10 flex items-center justify-center rounded-lg border border-stone-200 text-sm peer-checked:bg-stone-900 peer-checked:text-white peer-checked:border-stone-900 cursor-pointer">Flex</div>
+                            <div class="h-10 flex items-center justify-center rounded-lg border border-stone-200 text-sm peer-checked:bg-stone-900 peer-checked:text-white peer-checked:border-stone-900 cursor-pointer">Time window</div>
                         </label>
                     </div>
                 </div>
-                <div id="edit-window-end-field" class="${isFlex ? '' : 'hidden'}">
-                    <label class="block text-sm font-medium mb-1">Flexible until</label>
-                    <input id="edit-window-end" type="time" value="${apt.window_end || '13:00'}"
+                <div id="edit-time-fixed" class="${isFlex ? 'hidden' : ''}">
+                    <label class="block text-sm font-medium mb-1">Time</label>
+                    <input id="edit-time" type="time" value="${apt.time}" required
                         class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
+                </div>
+                <div id="edit-time-window" class="${isFlex ? 'grid grid-cols-2 gap-3' : 'hidden grid grid-cols-2 gap-3'}">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Earliest</label>
+                        <input id="edit-window-start" type="time" value="${apt.window_start || apt.time || '09:00'}"
+                            class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Latest</label>
+                        <input id="edit-window-end" type="time" value="${apt.window_end || '13:00'}"
+                            class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm" />
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium mb-1">Visit type</label>
+                        <label class="block text-sm font-medium mb-1">Visit</label>
                         <select id="edit-visit-type" class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm">
                             <option value="prenatal" ${apt.visit_type === 'prenatal' ? 'selected' : ''}>Prenatal</option>
                             <option value="postnatal" ${apt.visit_type === 'postnatal' ? 'selected' : ''}>Postnatal</option>
@@ -242,10 +263,12 @@ export function showEditAppointment(apt, onSaved) {
         </div>
     `);
 
-    // Toggle window end field
+    // Toggle fixed time vs time window fields
     document.querySelectorAll('input[name="edit-kind"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            document.getElementById('edit-window-end-field').classList.toggle('hidden', e.target.value !== 'flexible');
+            const isWindow = e.target.value === 'flexible';
+            document.getElementById('edit-time-fixed').classList.toggle('hidden', isWindow);
+            document.getElementById('edit-time-window').classList.toggle('hidden', !isWindow);
         });
     });
 
@@ -271,7 +294,10 @@ export function showEditAppointment(apt, onSaved) {
 
         try {
             const kind = document.querySelector('input[name="edit-kind"]:checked').value;
-            const time = document.getElementById('edit-time').value;
+            const isWindow = kind === 'flexible';
+            const time = isWindow
+                ? document.getElementById('edit-window-start').value
+                : document.getElementById('edit-time').value;
 
             await api.updateAppointment(apt.id, {
                 date: document.getElementById('edit-date').value,
@@ -280,7 +306,7 @@ export function showEditAppointment(apt, onSaved) {
                 duration_minutes: parseInt(document.getElementById('edit-duration').value),
                 appointment_kind: kind,
                 window_start: time,
-                window_end: kind === 'flexible' ? document.getElementById('edit-window-end').value : '',
+                window_end: isWindow ? document.getElementById('edit-window-end').value : '',
                 notes: document.getElementById('edit-notes').value,
             });
 

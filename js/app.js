@@ -7,6 +7,7 @@ import { api } from './api.js';
 import { router } from './router.js';
 import './ui.js'; // Initialize shared UI utilities
 import { authView } from './views/auth.js';
+import { dashboardView } from './views/dashboard.js';
 import { todayView } from './views/today.js';
 import { driverView } from './views/driver.js';
 import { patientsView } from './views/patients.js';
@@ -14,6 +15,7 @@ import { calendarView } from './views/calendar.js';
 
 // Register views
 router.register('auth', authView);
+router.register('dashboard', dashboardView);
 router.register('today', todayView);
 router.register('driver', driverView);
 router.register('patients', patientsView);
@@ -21,6 +23,7 @@ router.register('calendar', calendarView);
 
 // Nav links config
 const NAV_LINKS = [
+    { name: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
     { name: 'today', label: 'Today', icon: 'route' },
     { name: 'calendar', label: 'Calendar', icon: 'calendar' },
     { name: 'patients', label: 'Mothers', icon: 'user' },
@@ -51,7 +54,7 @@ async function init() {
         if (name && name !== 'auth') {
             router.navigateTo(name, params);
         } else {
-            router.navigateTo('today');
+            router.navigateTo('dashboard');
         }
     } catch (e) {
         // Not logged in

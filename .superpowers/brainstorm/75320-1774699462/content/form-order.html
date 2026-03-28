@@ -1,0 +1,127 @@
+<h2>Form field order — current vs proposed</h2>
+<p class="subtitle">The left is today. The right reorders fields so each answer narrows down the next question.</p>
+
+<div class="split">
+
+  <!-- Current -->
+  <div class="mockup">
+    <div class="mockup-header">Current order</div>
+    <div class="mockup-body">
+      <div style="font-family:system-ui,sans-serif;max-width:300px;margin:0 auto;padding:4px">
+
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Mother</div>
+          <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px;color:#a8a29e">Select a mother…</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Date</div>
+            <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px">02.04.2026</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Time</div>
+            <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px">09:00</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Type</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="border:1px solid #1c1917;border-radius:8px;padding:9px;text-align:center;font-size:13px;background:#1c1917;color:white">Fixed</div>
+            <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px;text-align:center;font-size:13px;color:#78716c">Flex</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Visit type</div>
+            <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px">Prenatal</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Duration</div>
+            <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px">1 hr</div>
+          </div>
+        </div>
+
+        <div style="margin-top:4px;padding:10px 12px;border-radius:8px;background:#fef3c7;font-size:11px;color:#92400e;line-height:1.4">
+          ⚠ "Type" vs "Visit type" — two fields with "type" in the name. Also: you set the time before knowing if it's Fixed or Flex.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Proposed -->
+  <div class="mockup">
+    <div class="mockup-header">Proposed order</div>
+    <div class="mockup-body">
+      <div style="font-family:system-ui,sans-serif;max-width:300px;margin:0 auto;padding:4px">
+
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Mother</div>
+          <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px;color:#a8a29e">Select a mother…</div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Date</div>
+          <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px">02.04.2026</div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Scheduling</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="border:1px solid #1c1917;border-radius:8px;padding:9px;text-align:center;font-size:13px;background:#1c1917;color:white">Fixed time</div>
+            <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px;text-align:center;font-size:13px;color:#78716c">Time window</div>
+          </div>
+        </div>
+
+        <!-- Time field appears AFTER knowing it's fixed -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Time</div>
+          <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px">09:00</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Visit</div>
+            <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px">Prenatal</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Duration</div>
+            <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px">1 hr</div>
+          </div>
+        </div>
+
+        <div style="margin-top:4px;padding:10px 12px;border-radius:8px;background:#d1fae5;font-size:11px;color:#065f46;line-height:1.4">
+          ✓ Scheduling toggle comes first → time field meaning is already clear. No ambiguous "type" labels.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>What changes in "Time window" mode</h3>
+  <p class="subtitle">When the midwife picks "Time window", the single time field expands into two:</p>
+
+  <div style="font-family:system-ui,sans-serif;max-width:340px;margin:16px auto 0;background:#f5f0eb;border-radius:12px;padding:16px">
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Scheduling</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px;text-align:center;font-size:13px;color:#78716c;background:white">Fixed time</div>
+        <div style="border:1px solid #1c1917;border-radius:8px;padding:9px;text-align:center;font-size:13px;background:#1c1917;color:white">Time window</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Earliest</div>
+        <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px;background:white">08:00</div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Latest</div>
+        <div style="border:1px solid #e7e5e4;border-radius:8px;padding:9px 12px;font-size:13px;background:white">13:00</div>
+      </div>
+    </div>
+  </div>
+</div>

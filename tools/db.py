@@ -400,25 +400,40 @@ def save_route(user_id, date_str, ordered_ids, travel_minutes):
 # ---------------------------------------------------------------------------
 
 def seed_mock_data(user_id):
+    # Anchored to 2026-03-28 so demo data stays consistent regardless of run date
+    start = date(2026, 3, 28)
+
     patients_data = [
-        {"name": "Lena Bergmann", "address": "Kastanienallee 12, 10435 Berlin",
+        {"name": "Lena Bergmann", "address": "Langhansstraße 61, 13086 Berlin",
          "phone": "+49 30 12345678", "gestational_age_weeks": 38, "gestational_age_days": 2,
-         "due_date": (date.today() + timedelta(days=12)).isoformat(), "status": "active"},
-        {"name": "Maja Hoffmann", "address": "Schillerstraße 5, 80336 München",
-         "phone": "+49 89 98765432", "gestational_age_weeks": 40, "gestational_age_days": 0,
-         "due_date": date.today().isoformat(), "status": "active"},
-        {"name": "Sophie Richter", "address": "Eppendorfer Baum 7, 20249 Hamburg",
-         "phone": "+49 40 11223344", "gestational_age_weeks": 35, "gestational_age_days": 5,
-         "due_date": (date.today() + timedelta(days=30)).isoformat(), "status": "active"},
-        {"name": "Clara Neumann", "address": "Habsburger Str. 9, 50674 Köln",
-         "phone": "+49 221 55667788", "gestational_age_weeks": 0, "gestational_age_days": 0,
-         "due_date": (date.today() - timedelta(days=10)).isoformat(), "status": "postpartum"},
-        {"name": "Anna Vogt", "address": "Weender Str. 22, 37073 Göttingen",
-         "phone": "+49 551 33445566", "gestational_age_weeks": 39, "gestational_age_days": 1,
-         "due_date": (date.today() + timedelta(days=6)).isoformat(), "status": "active"},
-        {"name": "Emma Fischer", "address": "Eisenbahnstraße 14, 04315 Leipzig",
-         "phone": "+49 341 77889900", "gestational_age_weeks": 36, "gestational_age_days": 4,
-         "due_date": (date.today() + timedelta(days=23)).isoformat(), "status": "active"},
+         "due_date": (start + timedelta(days=12)).isoformat(), "status": "active"},
+        {"name": "Maja Hoffmann", "address": "Greifswalder Str. 87-90, 10409 Berlin",
+         "phone": "+49 30 98765432", "gestational_age_weeks": 40, "gestational_age_days": 0,
+         "due_date": start.isoformat(), "status": "active"},
+        {"name": "Sophie Richter", "address": "Prenzlauer Allee 207, 10405 Berlin",
+         "phone": "+49 30 11223344", "gestational_age_weeks": 35, "gestational_age_days": 5,
+         "due_date": (start + timedelta(days=30)).isoformat(), "status": "active"},
+        {"name": "Clara Neumann", "address": "Kollwitzstraße 47, 10405 Berlin",
+         "phone": "+49 30 55667788", "gestational_age_weeks": 0, "gestational_age_days": 0,
+         "due_date": (start - timedelta(days=10)).isoformat(), "status": "postpartum"},
+        {"name": "Anna Vogt", "address": "Kopenhagener Str. 66, 10437 Berlin",
+         "phone": "+49 30 33445566", "gestational_age_weeks": 39, "gestational_age_days": 1,
+         "due_date": (start + timedelta(days=6)).isoformat(), "status": "active"},
+        {"name": "Emma Fischer", "address": "Greifenhagener Str. 31, 10437 Berlin",
+         "phone": "+49 30 77889900", "gestational_age_weeks": 36, "gestational_age_days": 4,
+         "due_date": (start + timedelta(days=23)).isoformat(), "status": "active"},
+        {"name": "Julia Bauer", "address": "Neumannstraße 9/11, 13189 Berlin",
+         "phone": "+49 30 22334455", "gestational_age_weeks": 32, "gestational_age_days": 0,
+         "due_date": (start + timedelta(days=56)).isoformat(), "status": "active"},
+        {"name": "Miriam Koch", "address": "Liselotte-Herrmann-Straße 11, 10407 Berlin",
+         "phone": "+49 30 66778899", "gestational_age_weeks": 0, "gestational_age_days": 0,
+         "due_date": (start - timedelta(days=3)).isoformat(), "status": "postpartum"},
+        {"name": "Hanna Wolf", "address": "Käthe-Niederkirchner-Straße 4, 10407 Berlin",
+         "phone": "+49 30 44556677", "gestational_age_weeks": 28, "gestational_age_days": 3,
+         "due_date": (start + timedelta(days=81)).isoformat(), "status": "active"},
+        {"name": "Laura Schäfer", "address": "Roelckestraße 6, 13086 Berlin",
+         "phone": "+49 30 99887766", "gestational_age_weeks": 41, "gestational_age_days": 1,
+         "due_date": (start - timedelta(days=8)).isoformat(), "status": "active"},
     ]
 
     created = []
@@ -426,26 +441,78 @@ def seed_mock_data(user_id):
         patient = create_patient(user_id, p)
         created.append(patient)
 
-    today = date.today()
-    monday = today - timedelta(days=today.weekday())
-
+    # day_offset, time, visit_type, kind, patient_idx
+    # 14 days (0=Sat 28.03 … 13=Fri 10.04), varying load 1–7 per day
     slots = [
-        (0, "09:00", "prenatal", "fixed", 0),
-        (0, "11:00", "prenatal", "flexible", 0),
-        (1, "10:30", "prenatal", "flexible", 1),
-        (1, "14:00", "birth", "fixed", 1),
-        (2, "09:30", "prenatal", "flexible", 2),
-        (2, "11:00", "postnatal", "fixed", 3),
-        (3, "08:30", "prenatal", "flexible", 4),
-        (3, "13:00", "prenatal", "fixed", 5),
-        (4, "10:00", "prenatal", "flexible", 0),
-        (4, "15:00", "postnatal", "fixed", 3),
+        # Sat 28.03 — 2 appointments
+        (0,  "10:00", "prenatal",  "fixed",    1),   # Maja — due today
+        (0,  "13:30", "postnatal", "fixed",    7),   # Miriam — 3d postpartum
+        # Sun 29.03 — 1 appointment
+        (1,  "11:00", "postnatal", "flexible", 3),   # Clara — 11d postpartum
+        # Mon 30.03 — 3 appointments
+        (2,  "08:30", "prenatal",  "flexible", 4),   # Anna — 39w, due in 6d
+        (2,  "11:00", "prenatal",  "fixed",    0),   # Lena
+        (2,  "14:30", "prenatal",  "flexible", 2),   # Sophie
+        # Tue 31.03 — 5 appointments
+        (3,  "08:00", "prenatal",  "flexible", 9),   # Laura — overdue
+        (3,  "10:00", "birth",     "fixed",    1),   # Maja — birth visit
+        (3,  "12:00", "postnatal", "fixed",    3),   # Clara
+        (3,  "14:00", "prenatal",  "flexible", 5),   # Emma
+        (3,  "16:00", "prenatal",  "fixed",    6),   # Julia
+        # Wed 01.04 — 7 appointments
+        (4,  "08:30", "prenatal",  "flexible", 4),   # Anna
+        (4,  "09:30", "postnatal", "fixed",    7),   # Miriam
+        (4,  "11:00", "prenatal",  "fixed",    0),   # Lena
+        (4,  "12:30", "prenatal",  "flexible", 8),   # Hanna
+        (4,  "14:00", "prenatal",  "flexible", 2),   # Sophie
+        (4,  "15:30", "prenatal",  "fixed",    9),   # Laura
+        (4,  "17:00", "postnatal", "flexible", 3),   # Clara
+        # Thu 02.04 — 6 appointments
+        (5,  "09:00", "prenatal",  "fixed",    5),   # Emma
+        (5,  "10:30", "birth",     "fixed",    4),   # Anna — birth visit
+        (5,  "12:00", "postnatal", "fixed",    7),   # Miriam
+        (5,  "13:30", "prenatal",  "flexible", 6),   # Julia
+        (5,  "15:00", "prenatal",  "fixed",    0),   # Lena
+        (5,  "16:30", "prenatal",  "flexible", 8),   # Hanna
+        # Fri 03.04 — 4 appointments
+        (6,  "09:00", "postnatal", "fixed",    4),   # Anna — 1d postnatal
+        (6,  "11:00", "prenatal",  "flexible", 2),   # Sophie
+        (6,  "13:00", "prenatal",  "fixed",    9),   # Laura
+        (6,  "15:30", "prenatal",  "flexible", 6),   # Julia
+        # Sat 04.04 — 2 appointments
+        (7,  "10:00", "postnatal", "fixed",    4),   # Anna — 2d postnatal
+        (7,  "12:00", "postnatal", "flexible", 3),   # Clara
+        # Sun 05.04 — 1 appointment
+        (8,  "11:00", "postnatal", "fixed",    4),   # Anna — 3d postnatal
+        # Mon 06.04 — 4 appointments
+        (9,  "08:30", "postnatal", "flexible", 4),   # Anna — 4d postnatal
+        (9,  "10:30", "prenatal",  "fixed",    5),   # Emma
+        (9,  "13:00", "prenatal",  "flexible", 8),   # Hanna
+        (9,  "15:00", "prenatal",  "fixed",    1),   # Maja
+        # Tue 07.04 — 5 appointments
+        (10, "09:00", "prenatal",  "flexible", 9),   # Laura
+        (10, "10:30", "postnatal", "fixed",    7),   # Miriam
+        (10, "12:00", "prenatal",  "fixed",    2),   # Sophie
+        (10, "14:00", "prenatal",  "flexible", 6),   # Julia
+        (10, "16:00", "prenatal",  "fixed",    0),   # Lena
+        # Wed 08.04 — 3 appointments
+        (11, "09:00", "prenatal",  "flexible", 8),   # Hanna
+        (11, "11:30", "prenatal",  "fixed",    5),   # Emma
+        (11, "14:00", "postnatal", "flexible", 4),   # Anna — 6d postnatal
+        # Thu 09.04 — 4 appointments
+        (12, "08:30", "prenatal",  "flexible", 9),   # Laura
+        (12, "10:00", "prenatal",  "fixed",    1),   # Maja
+        (12, "13:00", "prenatal",  "flexible", 6),   # Julia
+        (12, "15:30", "prenatal",  "fixed",    0),   # Lena
+        # Fri 10.04 — 2 appointments
+        (13, "10:00", "prenatal",  "flexible", 2),   # Sophie
+        (13, "13:00", "prenatal",  "fixed",    8),   # Hanna
     ]
 
     for day_off, time_str, visit_type, kind, patient_idx in slots:
-        apt_date = (monday + timedelta(days=day_off)).isoformat()
-        window_end = ""
+        apt_date = (start + timedelta(days=day_off)).isoformat()
         window_start = time_str
+        window_end = ""
         if kind == "flexible":
             h = int(time_str.split(":")[0])
             window_end = f"{h+3:02d}:00"

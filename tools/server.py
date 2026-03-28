@@ -61,6 +61,7 @@ def auth_register():
         return jsonify({"error": "An account with this email already exists"}), 409
 
     user = db.create_user(email, password, name)
+    db.seed_mock_data(user['id'])
     session['user_id'] = user['id']
     return jsonify(user), 201
 
@@ -140,11 +141,19 @@ def create_patient():
         return jsonify({"error": "name and address are required"}), 400
 
     patient = db.create_patient(user_id, data)
-    lat, lon = route_module.geocode_address(patient["address"])
-    if lat is not None:
+    lat_in = data.get("lat")
+    lon_in = data.get("lon")
+    if lat_in is not None and lon_in is not None:
+        lat, lon = float(lat_in), float(lon_in)
         db.update_patient_coords(patient["id"], lat, lon)
         patient["lat"] = lat
         patient["lon"] = lon
+    else:
+        lat, lon = route_module.geocode_address(patient["address"])
+        if lat is not None:
+            db.update_patient_coords(patient["id"], lat, lon)
+            patient["lat"] = lat
+            patient["lon"] = lon
 
     return jsonify(patient), 201
 
@@ -161,7 +170,12 @@ def update_patient(patient_id):
     patient = db.update_patient(user_id, patient_id, data)
 
     if address_changed:
-        lat, lon = route_module.geocode_address(patient["address"])
+        lat_in = data.get("lat")
+        lon_in = data.get("lon")
+        if lat_in is not None and lon_in is not None:
+            lat, lon = float(lat_in), float(lon_in)
+        else:
+            lat, lon = route_module.geocode_address(patient["address"])
         db.update_patient_coords(patient_id, lat, lon)
         patient["lat"] = lat
         patient["lon"] = lon
@@ -187,12 +201,27 @@ def get_appointments():
     date_str = request.args.get("date")
     month_str = request.args.get("month")
 
+    from_str = request.args.get("from")
+    days_str = request.args.get("days")
+
     if date_str:
         return jsonify(db.list_appointments_by_date(user_id, date_str))
     elif month_str:
         return jsonify(db.list_appointments_by_month(user_id, month_str))
+    elif from_str and days_str:
+        from datetime import date, timedelta
+        try:
+            start = date.fromisoformat(from_str)
+            days = int(days_str)
+        except (ValueError, TypeError):
+            return jsonify({"error": "Invalid from or days parameter"}), 400
+        all_apts = []
+        for i in range(days):
+            d = (start + timedelta(days=i)).isoformat()
+            all_apts.extend(db.list_appointments_by_date(user_id, d))
+        return jsonify(all_apts)
     else:
-        return jsonify({"error": "Provide ?date=YYYY-MM-DD or ?month=YYYY-MM"}), 400
+        return jsonify({"error": "Provide ?date=YYYY-MM-DD, ?month=YYYY-MM, or ?from=YYYY-MM-DD&days=N"}), 400
 
 
 @app.route("/api/appointments", methods=["POST"])
@@ -304,6 +333,7 @@ def optimize_route():
     ordered_ids = [a["id"] for a in result["ordered_appointments"]]
     db.save_route(user_id, date_str, ordered_ids, result["total_travel_minutes"])
 
+    result["date"] = date_str
     return jsonify(result)
 
 
@@ -373,4 +403,4 @@ def static_files(filename):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5002)
+    app.run(debug=True, port=5003)

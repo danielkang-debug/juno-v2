@@ -1,0 +1,110 @@
+<h2>How should "Add Appointment" be surfaced?</h2>
+<p class="subtitle">The current "+" icon is hard to see. Pick the entry point that feels most natural.</p>
+
+<div class="cards">
+
+  <!-- Option A: Inline add row -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#f5f0eb;border-radius:12px;padding:16px;font-family:system-ui,sans-serif;max-width:340px;margin:0 auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span style="font-size:13px;color:#78716c;font-weight:500">3 appointments</span>
+          <button style="display:flex;align-items:center;gap:4px;background:transparent;border:1.5px dashed #a8a29e;border-radius:8px;padding:4px 10px;font-size:12px;color:#78716c;cursor:pointer">
+            ＋ Import
+          </button>
+        </div>
+        <div style="background:white;border-radius:10px;border:1px solid #e7e5e4;padding:12px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="font-size:13px;font-weight:600">mother f <span style="font-size:11px;background:#1c1917;color:white;border-radius:4px;padding:1px 5px;font-weight:400">Fixed</span></span>
+            <span style="font-size:13px;color:#78716c">09:00</span>
+          </div>
+          <div style="font-size:11px;color:#a8a29e">60 min · prenatal · Ohlauer Str 27</div>
+        </div>
+        <div style="background:white;border-radius:10px;border:1px solid #e7e5e4;padding:12px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="font-size:13px;font-weight:600">mother d <span style="font-size:11px;border:1px dashed #a8a29e;border-radius:4px;padding:1px 5px;font-weight:400">Flex</span></span>
+            <span style="font-size:13px;color:#78716c">09:00</span>
+          </div>
+          <div style="font-size:11px;color:#a8a29e">60 min · prenatal · Rochstr 14E</div>
+        </div>
+        <!-- Inline add row -->
+        <div style="background:transparent;border-radius:10px;border:1.5px dashed #d6d3d1;padding:12px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer">
+          <span style="font-size:16px;color:#a8a29e">+</span>
+          <span style="font-size:13px;color:#a8a29e">Add appointment</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Inline add row</h3>
+      <p>A dashed placeholder row at the bottom of the list, always visible. Feels natural — you scan the list, then add below.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Floating Action Button -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#f5f0eb;border-radius:12px;padding:16px;font-family:system-ui,sans-serif;max-width:340px;margin:0 auto;position:relative;min-height:220px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span style="font-size:13px;color:#78716c;font-weight:500">3 appointments</span>
+          <button style="display:flex;align-items:center;gap:4px;background:transparent;border:1.5px dashed #a8a29e;border-radius:8px;padding:4px 10px;font-size:12px;color:#78716c">＋ Import</button>
+        </div>
+        <div style="background:white;border-radius:10px;border:1px solid #e7e5e4;padding:12px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="font-size:13px;font-weight:600">mother f <span style="font-size:11px;background:#1c1917;color:white;border-radius:4px;padding:1px 5px;font-weight:400">Fixed</span></span>
+            <span style="font-size:13px;color:#78716c">09:00</span>
+          </div>
+          <div style="font-size:11px;color:#a8a29e">60 min · prenatal · Ohlauer Str 27</div>
+        </div>
+        <div style="background:white;border-radius:10px;border:1px solid #e7e5e4;padding:12px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="font-size:13px;font-weight:600">mother d <span style="font-size:11px;border:1px dashed #a8a29e;border-radius:4px;padding:1px 5px;font-weight:400">Flex</span></span>
+            <span style="font-size:13px;color:#78716c">09:00</span>
+          </div>
+          <div style="font-size:11px;color:#a8a29e">60 min · prenatal · Rochstr 14E</div>
+        </div>
+        <!-- FAB -->
+        <div style="position:absolute;bottom:16px;right:16px;background:#1c1917;color:white;border-radius:100px;padding:10px 18px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.2)">
+          <span>+</span> Add
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Floating action button</h3>
+      <p>A pill-shaped FAB pinned to the bottom-right corner. Always accessible, never lost in the list. Common pattern on mobile.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Header pill button -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#f5f0eb;border-radius:12px;padding:16px;font-family:system-ui,sans-serif;max-width:340px;margin:0 auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span style="font-size:13px;color:#78716c;font-weight:500">3 appointments</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button style="background:transparent;border:none;color:#78716c;font-size:18px;line-height:1;cursor:pointer">↑</button>
+            <button style="background:#1c1917;color:white;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer">+ Add</button>
+          </div>
+        </div>
+        <div style="background:white;border-radius:10px;border:1px solid #e7e5e4;padding:12px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="font-size:13px;font-weight:600">mother f <span style="font-size:11px;background:#1c1917;color:white;border-radius:4px;padding:1px 5px;font-weight:400">Fixed</span></span>
+            <span style="font-size:13px;color:#78716c">09:00</span>
+          </div>
+          <div style="font-size:11px;color:#a8a29e">60 min · prenatal · Ohlauer Str 27</div>
+        </div>
+        <div style="background:white;border-radius:10px;border:1px solid #e7e5e4;padding:12px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="font-size:13px;font-weight:600">mother d <span style="font-size:11px;border:1px dashed #a8a29e;border-radius:4px;padding:1px 5px;font-weight:400">Flex</span></span>
+            <span style="font-size:13px;color:#78716c">09:00</span>
+          </div>
+          <div style="font-size:11px;color:#a8a29e">60 min · prenatal · Rochstr 14E</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Labeled button in header</h3>
+      <p>Replace the bare "+" icon with a small solid "＋ Add" pill button next to the import icon. Minimal change, maximum clarity.</p>
+    </div>
+  </div>
+
+</div>

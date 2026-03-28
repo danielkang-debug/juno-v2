@@ -1,0 +1,5 @@
+{"type":"server-started","port":53689,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:53689","screen_dir":"/Users/danielkang/.gemini/antigravity/scratch/juno-v2/.superpowers/brainstorm/75320-1774699462/content","state_dir":"/Users/danielkang/.gemini/antigravity/scratch/juno-v2/.superpowers/brainstorm/75320-1774699462/state"}
+{"type":"screen-added","file":"/Users/danielkang/.gemini/antigravity/scratch/juno-v2/.superpowers/brainstorm/75320-1774699462/content/add-button.html"}
+{"type":"screen-added","file":"/Users/danielkang/.gemini/antigravity/scratch/juno-v2/.superpowers/brainstorm/75320-1774699462/content/form-order.html"}
+{"type":"screen-added","file":"/Users/danielkang/.gemini/antigravity/scratch/juno-v2/.superpowers/brainstorm/75320-1774699462/content/waiting-1.html"}
+{"type":"server-stopped","reason":"idle timeout"}

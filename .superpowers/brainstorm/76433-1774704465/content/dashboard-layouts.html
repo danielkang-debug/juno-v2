@@ -1,0 +1,117 @@
+<h2>Dashboard layout options</h2>
+<p class="subtitle">All three include the quick-add button and upcoming appointments. The difference is structure and emphasis.</p>
+
+<div class="cards">
+
+  <!-- Option A: Minimal / list-first -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#f5f0eb;border-radius:12px;padding:16px;font-family:system-ui,sans-serif;max-width:300px;margin:0 auto;font-size:13px">
+
+        <div style="font-size:15px;font-weight:600;margin-bottom:12px">Good morning, Anna</div>
+
+        <button style="width:100%;background:#1c1917;color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:500;margin-bottom:16px;cursor:pointer">+ Add appointment</button>
+
+        <div style="font-size:11px;font-weight:600;color:#78716c;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Upcoming</div>
+
+        <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px">Today · Thu Apr 2</div>
+        <div style="background:white;border-radius:8px;border:1px solid #e7e5e4;padding:10px 12px;margin-bottom:4px">
+          <div style="display:flex;justify-content:space-between"><span style="font-weight:500">mother f</span><span style="color:#78716c">09:00</span></div>
+          <div style="color:#a8a29e;font-size:11px">60 min · prenatal</div>
+        </div>
+        <div style="background:white;border-radius:8px;border:1px solid #e7e5e4;padding:10px 12px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between"><span style="font-weight:500">mother b</span><span style="color:#78716c">11:00</span></div>
+          <div style="color:#a8a29e;font-size:11px">60 min · postnatal</div>
+        </div>
+
+        <div style="font-size:11px;font-weight:600;color:#44403c;margin-bottom:4px">Tomorrow · Fri Apr 3</div>
+        <div style="background:white;border-radius:8px;border:1px solid #e7e5e4;padding:10px 12px;margin-bottom:4px">
+          <div style="display:flex;justify-content:space-between"><span style="font-weight:500">mother c</span><span style="color:#78716c">10:00</span></div>
+          <div style="color:#a8a29e;font-size:11px">45 min · prenatal</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — List-first</h3>
+      <p>Quick-add at top, then a flat scrollable list of upcoming appointments grouped by day. Clean and fast to scan.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Today card + upcoming -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#f5f0eb;border-radius:12px;padding:16px;font-family:system-ui,sans-serif;max-width:300px;margin:0 auto;font-size:13px">
+
+        <div style="font-size:15px;font-weight:600;margin-bottom:12px">Good morning, Anna</div>
+
+        <div style="background:#1c1917;color:white;border-radius:12px;padding:14px;margin-bottom:12px">
+          <div style="font-size:11px;color:#a8a29e;margin-bottom:2px;text-transform:uppercase;letter-spacing:0.05em">Today · Thu Apr 2</div>
+          <div style="font-size:20px;font-weight:600;margin-bottom:8px">2 appointments</div>
+          <div style="display:flex;gap:6px">
+            <button style="flex:1;background:white;color:#1c1917;border:none;border-radius:7px;padding:7px;font-size:12px;font-weight:500;cursor:pointer">View day</button>
+            <button style="flex:1;background:rgba(255,255,255,0.15);color:white;border:none;border-radius:7px;padding:7px;font-size:12px;font-weight:500;cursor:pointer">+ Add</button>
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:600;color:#78716c;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Coming up</div>
+
+        <div style="background:white;border-radius:8px;border:1px solid #e7e5e4;padding:10px 12px;margin-bottom:4px">
+          <div style="font-size:10px;color:#a8a29e;margin-bottom:2px">Fri Apr 3</div>
+          <div style="display:flex;justify-content:space-between"><span style="font-weight:500">mother c</span><span style="color:#78716c">10:00</span></div>
+          <div style="color:#a8a29e;font-size:11px">45 min · prenatal</div>
+        </div>
+        <div style="background:white;border-radius:8px;border:1px solid #e7e5e4;padding:10px 12px;margin-bottom:4px">
+          <div style="font-size:10px;color:#a8a29e;margin-bottom:2px">Mon Apr 7</div>
+          <div style="display:flex;justify-content:space-between"><span style="font-weight:500">mother d</span><span style="color:#78716c">14:00</span></div>
+          <div style="color:#a8a29e;font-size:11px">60 min · postnatal</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Today card + upcoming</h3>
+      <p>A prominent "today" summary card (appointment count + quick actions) above a simple upcoming list. Good when today matters most.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Stats + list -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#f5f0eb;border-radius:12px;padding:16px;font-family:system-ui,sans-serif;max-width:300px;margin:0 auto;font-size:13px">
+
+        <div style="font-size:15px;font-weight:600;margin-bottom:12px">Good morning, Anna</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          <div style="background:white;border-radius:10px;border:1px solid #e7e5e4;padding:12px">
+            <div style="font-size:11px;color:#a8a29e;margin-bottom:2px">Today</div>
+            <div style="font-size:20px;font-weight:700">2</div>
+            <div style="font-size:11px;color:#78716c">appointments</div>
+          </div>
+          <div style="background:white;border-radius:10px;border:1px solid #e7e5e4;padding:12px">
+            <div style="font-size:11px;color:#a8a29e;margin-bottom:2px">This week</div>
+            <div style="font-size:20px;font-weight:700">7</div>
+            <div style="font-size:11px;color:#78716c">appointments</div>
+          </div>
+        </div>
+
+        <button style="width:100%;background:#1c1917;color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:500;margin-bottom:14px;cursor:pointer">+ Add appointment</button>
+
+        <div style="font-size:11px;font-weight:600;color:#78716c;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Upcoming</div>
+        <div style="background:white;border-radius:8px;border:1px solid #e7e5e4;padding:10px 12px;margin-bottom:4px">
+          <div style="font-size:10px;color:#a8a29e;margin-bottom:2px">Today · 09:00</div>
+          <div style="font-weight:500">mother f</div>
+          <div style="color:#a8a29e;font-size:11px">60 min · prenatal</div>
+        </div>
+        <div style="background:white;border-radius:8px;border:1px solid #e7e5e4;padding:10px 12px;margin-bottom:4px">
+          <div style="font-size:10px;color:#a8a29e;margin-bottom:2px">Today · 11:00</div>
+          <div style="font-weight:500">mother b</div>
+          <div style="color:#a8a29e;font-size:11px">60 min · postnatal</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Stats + list</h3>
+      <p>Small stat tiles (today / this week) above the quick-add button and upcoming list. More information at a glance.</p>
+    </div>
+  </div>
+
+</div>

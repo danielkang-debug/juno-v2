@@ -130,10 +130,13 @@ function showPatientForm(patient) {
                     <input id="pf-name" type="text" value="${escapeHtml(p.name || '')}" required
                         class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-stone-900" />
                 </div>
-                <div>
+                <div class="relative">
                     <label class="block text-sm font-medium mb-1">Address *</label>
                     <input id="pf-address" type="text" value="${escapeHtml(p.address || '')}" required
+                        autocomplete="off"
                         class="w-full h-10 px-3 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-stone-900" />
+                    <ul id="pf-address-suggestions"
+                        class="absolute z-50 w-full bg-white border border-stone-200 rounded-lg mt-1 shadow-md hidden text-sm"></ul>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Phone</label>
@@ -179,6 +182,75 @@ function showPatientForm(patient) {
         </div>
     `);
 
+    // --- Address autocomplete ---
+    let confirmedCoords = null;
+    let debounceTimer = null;
+
+    const addressInput = document.getElementById('pf-address');
+    const suggestionsList = document.getElementById('pf-address-suggestions');
+
+    function formatSuggestion(result) {
+        const a = result.address || {};
+        const parts = [
+            a.road,
+            a.house_number,
+            a.suburb || a.city_district || a.neighbourhood || a.quarter
+        ].filter(Boolean);
+        return parts.join(' ') || result.display_name;
+    }
+
+    addressInput.addEventListener('input', () => {
+        confirmedCoords = null;
+        clearTimeout(debounceTimer);
+        const query = addressInput.value.trim();
+        if (query.length < 3) {
+            suggestionsList.classList.add('hidden');
+            suggestionsList.innerHTML = '';
+            return;
+        }
+        debounceTimer = setTimeout(async () => {
+            try {
+                const params = new URLSearchParams({
+                    q: query, format: 'json', limit: '5',
+                    countrycodes: 'de', viewbox: '13.09,52.34,13.76,52.68',
+                    bounded: '1', addressdetails: '1'
+                });
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?${params}`);
+                const results = await res.json();
+                if (!results.length) {
+                    suggestionsList.classList.add('hidden');
+                    suggestionsList.innerHTML = '';
+                    return;
+                }
+                suggestionsList._results = results;
+                suggestionsList.innerHTML = results.map((r, i) =>
+                    `<li class="px-3 py-2 cursor-pointer hover:bg-stone-50 border-b border-stone-100 last:border-0" data-index="${i}">${escapeHtml(formatSuggestion(r))}</li>`
+                ).join('');
+                suggestionsList.classList.remove('hidden');
+            } catch {
+                suggestionsList.classList.add('hidden');
+            }
+        }, 300);
+    });
+
+    suggestionsList.addEventListener('click', (e) => {
+        const li = e.target.closest('li');
+        if (!li) return;
+        const result = (suggestionsList._results || [])[parseInt(li.dataset.index)];
+        if (!result) return;
+        addressInput.value = formatSuggestion(result);
+        confirmedCoords = { lat: parseFloat(result.lat), lon: parseFloat(result.lon) };
+        suggestionsList.classList.add('hidden');
+        suggestionsList.innerHTML = '';
+    });
+
+    document.addEventListener('click', function dismissOnOutsideClick(e) {
+        if (!addressInput.contains(e.target) && !suggestionsList.contains(e.target)) {
+            suggestionsList.classList.add('hidden');
+        }
+    });
+    // --- End address autocomplete ---
+
     document.getElementById('patient-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('pf-submit');
@@ -193,6 +265,7 @@ function showPatientForm(patient) {
             gestational_age_days: parseInt(document.getElementById('pf-ga-days').value) || 0,
             due_date: document.getElementById('pf-due').value,
             notes: document.getElementById('pf-notes').value.trim(),
+            ...(confirmedCoords ? { lat: confirmedCoords.lat, lon: confirmedCoords.lon } : {}),
         };
         if (isEdit) {
             data.status = document.getElementById('pf-status').value;

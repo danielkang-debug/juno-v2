@@ -168,7 +168,10 @@ async function loadAppointments() {
     try {
         const apts = await api.getAppointments({ date: state.selectedDate });
         state.appointments = apts;
-        state.optimizedRoute = null;
+        // Preserve a pre-loaded optimized route (e.g. from dashboard "Plan today")
+        if (!state.optimizedRoute || state.optimizedRoute.date !== state.selectedDate) {
+            state.optimizedRoute = null;
+        }
         renderAppointmentList();
     } catch (err) {
         document.getElementById('today-content').innerHTML =
@@ -191,14 +194,9 @@ function renderAppointmentList() {
     html += `
         <div class="flex items-center justify-between mb-3">
             <span class="text-sm text-stone-500">${apts.length} appointment${apts.length !== 1 ? 's' : ''}</span>
-            <div class="flex gap-2">
-                <button id="import-btn" class="p-2 rounded-lg hover:bg-stone-100" title="Import">
-                    <i data-lucide="upload" class="w-4 h-4"></i>
-                </button>
-                <button id="add-apt-btn" class="p-2 rounded-lg hover:bg-stone-100" title="Add appointment">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                </button>
-            </div>
+            <button id="import-btn" class="p-2 rounded-lg hover:bg-stone-100" title="Import">
+                <i data-lucide="upload" class="w-4 h-4"></i>
+            </button>
         </div>
     `;
 
@@ -217,12 +215,10 @@ function renderAppointmentList() {
 
     if (apts.length === 0) {
         html += `
-            <div class="text-center py-12">
-                <p class="text-stone-400 mb-4">No appointments for this day</p>
-                <button id="add-apt-empty" class="h-11 px-6 bg-stone-900 text-white rounded-lg font-medium hover:bg-stone-800">
-                    Add appointment
-                </button>
-            </div>
+            <div class="text-center py-8 text-stone-400 text-sm">No appointments for this day</div>
+            <button id="add-apt-row" class="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-dashed border-stone-300 text-sm text-stone-400 hover:bg-stone-50 mb-3">
+                <span class="text-base leading-none">+</span> Add appointment
+            </button>
         `;
     } else {
         // Starting point card
@@ -324,6 +320,15 @@ function renderAppointmentList() {
             `;
         }
 
+        // Inline add row (only before optimization)
+        if (!isOptimized) {
+            html += `
+                <button id="add-apt-row" class="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-dashed border-stone-300 text-sm text-stone-400 hover:bg-stone-50 mt-1 mb-3">
+                    <span class="text-base leading-none">+</span> Add appointment
+                </button>
+            `;
+        }
+
         // Action buttons
         if (isOptimized) {
             html += `
@@ -378,8 +383,7 @@ function renderAppointmentList() {
     document.getElementById('export-maps-btn')?.addEventListener('click', exportToGoogleMaps);
     document.getElementById('notify-btn')?.addEventListener('click', showNotifySheet);
     document.getElementById('start-route-btn')?.addEventListener('click', startRoute);
-    document.getElementById('add-apt-btn')?.addEventListener('click', () => showAddAppointment(loadAppointments));
-    document.getElementById('add-apt-empty')?.addEventListener('click', () => showAddAppointment(loadAppointments));
+    document.getElementById('add-apt-row')?.addEventListener('click', () => showAddAppointment(loadAppointments));
     document.getElementById('import-btn')?.addEventListener('click', showImport);
 
     // Route settings inputs
